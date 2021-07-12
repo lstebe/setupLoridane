@@ -230,7 +230,7 @@ else
 echo "OK"
 fi
 
-if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ;then
+if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 echo "Okay. Shutdown"
 node-red-stop
 reboot now
