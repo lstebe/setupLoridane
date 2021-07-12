@@ -16,6 +16,7 @@ whiptail --msgbox "This script will set up a ROUTED (Own IP range) AP to your Ra
                                      |   +- PC#1 ------+
                                      +---+ 10.10.0.4   |
                                          +-------------+" 30 90 ;
+
 #OK
 if whiptail --yesno --yes-button OK --no-button Cancel "If you don't want this, press Cancel" 30 80 ;
 	then
