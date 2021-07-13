@@ -197,6 +197,10 @@ apt-get install npm -y
 echo "Installing NODE RED and setup as Service"
 apt-get install nodered -y
 systemctl enable nodered.service
+npm install node-red-dashboard
+npm install node-red-contrib-fs
+npm install node-red-contrib-throttle
+
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
 sudo nano +83,24 /home/pi/.node-red/settings.js
