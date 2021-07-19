@@ -203,6 +203,7 @@ npm install node-red-contrib-throttle
 
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
+whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords" 30 90 ;
 sudo nano +83,24 /home/pi/.node-red/settings.js
 node-red-restart
 echo "......................................................."
