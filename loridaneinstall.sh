@@ -179,9 +179,14 @@ npm install node-red-contrib-throttle ~/.node-red
 npm install crypto-js ~/.node-red
 npm install crypto ~/.node-red
 
+mv ~/.node-red/flows.json ~/.node-red/flows.json.orig
+mv ~/.node-red/settings.js ~/.node-red/settings.js.orig
+cp flows.json ~/.node-red/flows.json
+cp settings.js ~/.node-red/settings.js
+
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
-whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords" 30 90 ;
+whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is now appropriate" 30 90 ;
 sudo nano +83,24 ~/.node-red/settings.js
 node-red-restart
 echo "......................................................."
