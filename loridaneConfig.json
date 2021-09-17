@@ -1,0 +1,16 @@
+{
+"_comment": "the homepath to your Loridane should be set here, this can not be empty, close the directories with a / please",
+"path":{
+	"config":"/home/pi/LORIDANE/config/",
+	"database":"/home/pi/LORIDANE/database/"
+	},
+
+"_comment":"set here if the payloads of the lora nodes should be encrypted or not, key and initalisation vector must be a 16byte hex-tring and the same in your nodes",
+"encryption":{
+	"engaged":false,
+	"iv":"472B4B6250655368566D597133743677",
+	"key":"576E5A7234753778214125432A462D4A"
+	},
+"_comment":"The initial frequency the gateway should be listening to, this overrides the gateway setting",
+"freq":867e6
+}
