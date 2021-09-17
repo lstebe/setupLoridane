@@ -185,7 +185,8 @@ mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
 mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
 cp flows.json /home/pi/.node-red/flows.json
 cp settings.js /home/pi/.node-red/settings.js
-mkdir -p /home/pi/{LORIDANE}/{config,database}
+mkdir /home/pi/LORIDANE/config
+mkdir /home/pi/LORIDANE/database
 cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 
 echo "Enabled NODERED Service"
