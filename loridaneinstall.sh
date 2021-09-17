@@ -93,7 +93,7 @@ fi
 echo "domain=wlan">>"/etc/dnsmasq.conf"
 
 #Example SSID of the WiFi Network
-ssid="DataLogger-01"
+ssid="Loridane-01"
 ssid=$( whiptail --inputbox "Please enter the SSID your WiFi should have:" 20 30 myCreative-SSID 3>&1 1>&2 2>&3 )
 
 #pi.wlan is the DNS name of the pi
@@ -106,19 +106,7 @@ echo ".....unblock WiFi"
 rfkill unblock wlan
 echo "........................................................................"
 
-
-
 echo ".....Configure /etc/hostapd/hostapd.conf"
-echo ".....country_code=DE"
-echo ".....interface=wlan0"
-echo ".....ssid=DataLogger-01"
-echo ".....hw_mode=g --> 2.4GHz WiFi"
-echo ".....channel=7"
-echo ".....macaddr_acl=0"
-echo ".....auth_algs=1"
-echo ".....ignore_broadcast_ssid=0"
-echo ".....wpa=2"
-echo "wpa_passphrase=PASSWD"
 sleep 3
 echo "........................................................................"
 
@@ -158,18 +146,6 @@ echo "wpa_pairwise=TKIP">>"/etc/hostapd/hostapd.conf"
 echo "rsn_pairwise=CCMP">>"/etc/hostapd/hostapd.conf"
 echo ".....Done!........................................................................"
 echo ".................................................................................."
-echo ".................................................................................."
-echo "Start service with"
-echo ""
-echo "sudo systemctl start hostapd.service"
-echo ""
-echo "Stop service with"
-echo ""
-echo "sudo systemctl stop hostapd.service"
-echo ""
-echo "For automtically start up AP at boot type:"
-echo "sudo systemctl enable hostapd.service && sudo reboot now"
-echo ".................................................................................."
 
 if whiptail --yesno "Would you like to enable WiFi accesspoint as a service?" 30 80 ; then
 systemctl enable hostapd.service
@@ -197,21 +173,19 @@ apt-get install npm -y
 echo "Installing NODE RED and setup as Service"
 apt-get install nodered -y
 systemctl enable nodered.service
-npm install node-red-dashboard
-npm install node-red-contrib-fs
-npm install node-red-contrib-throttle
+npm install node-red-dashboard ~/.node-red
+npm install node-red-contrib-fs ~/.node-red
+npm install node-red-contrib-throttle ~/.node-red
+npm install crypto-js ~/.node-red
+npm install crypto ~/.node-red
 
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
 whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords" 30 90 ;
-sudo nano +83,24 /home/pi/.node-red/settings.js
+sudo nano +83,24 ~/.node-red/settings.js
 node-red-restart
 echo "......................................................."
 fi
-
-whiptail --msgbox "Please Enter a Credential Secret for Node Red.
-This is a key to Encrypt your UserData.
-Save and Exit via Strg+O , Enter, Strg+X" 30 80
 
 if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80 ; then
 echo "Installing MQTT Broker"
@@ -222,10 +196,6 @@ echo "you will be asked to input the password of your choice now"
 echo "Username is mqtusr"
 whiptail --msgbox "Please Enter a Password for your MQTT-Username: mqtusr" 30 80;
 mosquitto_passwd -c /etc/mosquitto/passwd mqtusr
-echo "Configure /etc/mosquitto/conf.d/default.conf"
-echo "allow_anonymous false"
-echo "password_file /etc/mosquitto/passwd"
-echo "listener 1883 $routerip"
 #Do
 echo "allow_anonymous false">>"/etc/mosquitto/conf.d/default.conf"
 echo "password_file /etc/mosquitto/passwd">>"/etc/mosquitto/conf.d/default.conf"
