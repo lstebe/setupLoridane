@@ -177,7 +177,7 @@ echo "Installing Additional Modules"
 npm install node-red-dashboard /home/pi/.node-red
 npm install node-red-contrib-fs /home/pi/.node-red
 npm install node-red-contrib-throttle /home/pi/.node-red
-npm install crypto-js /home/pi/.node-red
+npm install cryptojs /home/pi/.node-red
 npm install crypto /home/pi/.node-red
 
 echo "Copying some files and set up directories"
