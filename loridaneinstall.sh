@@ -174,25 +174,25 @@ echo "Installing NODE RED and setup as Service"
 apt-get install nodered -y
 systemctl enable nodered.service
 echo "Installing Additional Modules"
-npm install node-red-dashboard ~/.node-red
-npm install node-red-contrib-fs ~/.node-red
-npm install node-red-contrib-throttle ~/.node-red
-npm install crypto-js ~/.node-red
-npm install crypto ~/.node-red
+npm install node-red-dashboard /home/pi/.node-red
+npm install node-red-contrib-fs /home/pi/.node-red
+npm install node-red-contrib-throttle /home/pi/.node-red
+npm install crypto-js /home/pi/.node-red
+npm install crypto /home/pi/.node-red
 
 echo "Copying some files and set up directories"
-mv ~/.node-red/flows.json ~/.node-red/flows.json.orig
-mv ~/.node-red/settings.js ~/.node-red/settings.js.orig
-cp flows.json ~/.node-red/flows.json
-cp settings.js ~/.node-red/settings.js
-mkdir -p ~/{LORIDANE}/{config,database}
-cp loridaneConfig.json ~/LORIDANE/config/loridaneConfig.json
+mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
+mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
+cp flows.json /home/pi/.node-red/flows.json
+cp settings.js /home/pi/.node-red/settings.js
+mkdir -p /home/pi/{LORIDANE}/{config,database}
+cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
 
 whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is now appropriate" 30 90 ;
-sudo nano +83,24 ~/.node-red/settings.js
+sudo nano +83,24 /home/pi/.node-red/settings.js
 node-red-restart
 echo "......................................................."
 fi
