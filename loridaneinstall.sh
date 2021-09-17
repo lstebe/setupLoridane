@@ -200,6 +200,7 @@ fi
 if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80 ; then
 echo "Installing MQTT Broker"
 apt-get install mosquitto -y
+systemctl unmask mosquitto
 echo "......................................................."
 echo "setting up Passwordfile for MQTT"
 echo "you will be asked to input the password of your choice now"
