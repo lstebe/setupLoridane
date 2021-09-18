@@ -190,10 +190,18 @@ cp settings.js /home/pi/.node-red/settings.js
 mkdir -p /home/pi/LORIDANE/database
 cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 
+cd /home/pi/.node.red
+echo "Installing Additional Modules"
+npm install node-red-dashboard
+npm install node-red-contrib-fs
+npm install node-red-contrib-throttle
+npm install cryptojs
+npm install crypto
+
 echo "Enabled NODERED Service"
 echo "Restart NODE RED"
 
-whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is now appropriate" 30 90 ;
+whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is not appropriate" 30 90 ;
 sudo nano +83,24 /home/pi/.node-red/settings.js
 echo "......................................................."
 fi
