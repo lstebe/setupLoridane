@@ -36,7 +36,7 @@ echo ".......Installing HostAPD"
 apt install hostapd -y
 systemctl unmask hostapd
 systemctl enable hostapd
-apt install dnsmasq
+apt install dnsmasq -y
 DEBIAN_FRONTEND=noninteractive apt install -y netfilter-persistent iptables-persistent
 #Set up WiFi DHCP
 echo "interface wlan0">>"/etc/dhcpcd.conf"
