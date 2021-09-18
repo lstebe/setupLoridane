@@ -32,6 +32,9 @@ echo "#####Updating Repos"
 apt-get update
 apt-get upgrade -y
 echo "........................................................................"
+
+if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Point?" 30 80 ;
+	then
 echo ".......Installing HostAPD"
 apt install hostapd -y
 systemctl unmask hostapd
@@ -167,11 +170,17 @@ Enable/disable AP autostart at boot via
 <sudo systemctl enable|disable hostapd.service>" 30 80
 
 
+fi
+
 if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
-bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
-#echo "Installing NPM"
-#apt-get install npm -y
+##original command
+#bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+echo "Fetch Installation Script"
+curl -o installnr.sh https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered
+bash ./installnr.sh
+echo "Installing NPM and"
 echo "Installing NODE RED and setup as Service"
+#apt-get install npm -y
 #apt-get install nodered -y
 systemctl enable nodered.service
 #echo "Installing Additional Modules"
