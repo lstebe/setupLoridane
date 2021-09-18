@@ -189,6 +189,7 @@ mkdir -p /home/pi/LORIDANE/config
 mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
 mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
 cp flows_loridane.json /home/pi/.node-red/flows_loridane.json
+cp flows_loridane_cred.json /home/pi/.node-red/flows_loridane_cred.json
 cp settings.js /home/pi/.node-red/settings.js
 mkdir -p /home/pi/LORIDANE/database
 cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
