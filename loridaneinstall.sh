@@ -97,7 +97,7 @@ echo "domain=wlan">>"/etc/dnsmasq.conf"
 
 #Example SSID of the WiFi Network
 ssid="Loridane-01"
-ssid=$( whiptail --inputbox "Please enter the SSID your WiFi should have:" 20 30 myCreative-SSID 3>&1 1>&2 2>&3 )
+ssid=$( whiptail --inputbox "Please enter the SSID your WiFi should have:" 20 30 Loridane-02 3>&1 1>&2 2>&3 )
 
 #pi.wlan is the DNS name of the pi
 echo "address=/$ssid/$routerip">>"/etc/dnsmasq.conf"
@@ -193,7 +193,7 @@ cp settings.js /home/pi/.node-red/settings.js
 mkdir -p /home/pi/LORIDANE/database
 cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 
-cd /home/pi/.node.red
+cd /home/pi/.node-red
 echo "Installing Additional Modules"
 npm install node-red-dashboard
 npm install node-red-contrib-fs
