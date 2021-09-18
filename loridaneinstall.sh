@@ -173,13 +173,7 @@ Enable/disable AP autostart at boot via
 fi
 
 if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
-##original command
-#bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
-echo "Fetch Installation Script"
-curl -o installnr.sh https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered
-bash ./installnr.sh
-echo "Installing NPM and"
-echo "Installing NODE RED and setup as Service"
+sudo -u pi sh fetchNR.sh
 #apt-get install npm -y
 #apt-get install nodered -y
 systemctl enable nodered.service
