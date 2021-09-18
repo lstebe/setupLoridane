@@ -168,24 +168,26 @@ Enable/disable AP autostart at boot via
 
 
 if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
-echo "Installing NPM"
-apt-get install npm -y
+bash <(curl -sL https://raw.githubusercontent.com/node-red/linux-installers/master/deb/update-nodejs-and-nodered)
+#echo "Installing NPM"
+#apt-get install npm -y
 echo "Installing NODE RED and setup as Service"
-apt-get install nodered -y
+#apt-get install nodered -y
 systemctl enable nodered.service
-echo "Installing Additional Modules"
-npm install node-red-dashboard /home/pi/.node-red
-npm install node-red-contrib-fs /home/pi/.node-red
-npm install node-red-contrib-throttle /home/pi/.node-red
-npm install cryptojs /home/pi/.node-red
-npm install crypto /home/pi/.node-red
+#echo "Installing Additional Modules"
+#npm install node-red-dashboard
+#npm install node-red-contrib-fs
+#npm install node-red-contrib-throttle
+#npm install cryptojs
+#npm install crypto
 
 echo "Copying some files and set up directories"
+mkdir -p /home/pi/LORIDANE/config
 mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
 mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
-cp flows.json /home/pi/.node-red/flows.json
+cp flows_loridane.json /home/pi/.node-red/flows_loridane.json
 cp settings.js /home/pi/.node-red/settings.js
-mkdir -p /home/pi/LORIDANE/{config,database}
+mkdir -p /home/pi/LORIDANE/database
 cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 
 echo "Enabled NODERED Service"
@@ -193,7 +195,6 @@ echo "Restart NODE RED"
 
 whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is now appropriate" 30 90 ;
 sudo nano +83,24 /home/pi/.node-red/settings.js
-node-red-restart
 echo "......................................................."
 fi
 
