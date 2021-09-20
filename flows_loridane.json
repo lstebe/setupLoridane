@@ -3563,7 +3563,7 @@
         "type": "function",
         "z": "4e984df.de567b4",
         "name": "msg.data.pay to msg.payload",
-        "func": "payload = msg.data.pay;\nif(payload == \"+\")return;\ntopic = msg.topic;\n\n//cut the data object to the minimum\nmsg = {payload:payload, topic:topic, data:msg.data, config:msg.config};\nreturn msg;",
+        "func": "let payload = msg.data.pay;\nconst checkUID = global.get(\"LORIDANE.funcs.checkUID\");\n\nif(payload == \"+\")return;\nif(!checkUID(msg.data.node))return;\n\ntopic = msg.topic;\n\n//cut the data object to the minimum\nmsg = {payload:payload, topic:topic, data:msg.data, config:msg.config};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -4116,23 +4116,6 @@
         "wires": [
             []
         ]
-    },
-    {
-        "id": "62dbd402.90d30c",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1170,
-        "y": 220,
-        "wires": []
     },
     {
         "id": "c3c07ea9.8a444",
