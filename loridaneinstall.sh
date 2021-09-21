@@ -34,14 +34,16 @@ fi
 
 echo "........................................................................"
 #Install needed Packages
-echo "#####Updating Repos"
+echo "LORIDANE - Expanding FS"
+raspi-config --expand-rootfs
+echo "LORIDANE - Updating Repos"
 apt-get update
 apt-get upgrade -y
 echo "........................................................................"
 
 if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Point?" 30 80 ;
 	then
-	echo ".......Installing HostAPD"
+	echo "LORIDANE - Installing HostAPD"
 	apt install hostapd -y
 	systemctl unmask hostapd
 	systemctl enable hostapd
@@ -56,11 +58,11 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	Do you want to change it?" 30 80; then
 		routerip=$(whiptail --inputbox "Set an IP address:" 20 30 192.168.4.1 3>&1 1>&2 2>&3)
 		echo "	static ip_address=pi.wlangw/24">>'/etc/dhcpcd.conf'
-		echo "Done. Set IP to $routerip"
+		echo "LORIDANE - Done. Set IP to $routerip"
 	else
 		echo "	static ip_address=$routerip">>"/etc/dhcpcd.conf"
 		echo "	static domain_name_servers=$routerip 8.8.8.8">>"/etc/dhcpcd.conf"
-		echo "Done!"
+		echo "LORIDANE - Done!"
 	fi
 	echo "	nohook wpa_supplicant">>"/etc/dhcpcd.conf"
 	echo "# Enable IPv4 routing">>"/etc/sysctl.d/routed-ap.conf"
@@ -71,11 +73,11 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	#Backup original dnsmasq.conf
 	mv /etc/dnsmasq.conf /etc/dnsmasq.conf.orig
 	echo "........................................................................"
-	echo ".....Configure /etc/dnsmasq.conf"
-	echo ".....with"
-	echo ".....interface=wlan0"
-	echo ".....domain=wlan"
-	echo ".....address=/pi.wlangw/$routerip"
+	echo "LORIDANE - Configure /etc/dnsmasq.conf"
+	echo "LORIDANE - with"
+	echo "LORIDANE - interface=wlan0"
+	echo "LORIDANE - domain=wlan"
+	echo "LORIDANE - address=/pi.wlangw/$routerip"
 	echo "........................................................................"
 	sleep 3
 	echo "interface=wlan0 # Listening interface">>"/etc/dnsmasq.conf"
@@ -85,7 +87,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	if whiptail --yesno --yes-button Default --no-button Configure "Would you like to configure the DHCP range or leave it default?
 	From 192.168.4.100 TO 192.168.4.200" 30 80; then
 		echo 'dhcp-range=192.168.4.100,192.168.4.200,255.255.255.0,24h'>>'/etc/dnsmasq.conf'
-		echo "Done!"
+		echo "LORIDANE - Done!"
 	else
 		whiptail --msgbox "Now you'll configure the DHCP range
 		The first IP adress in the next window.\n
@@ -109,7 +111,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	echo "address=/$ssid/$routerip">>"/etc/dnsmasq.conf"
 
 	echo "........................................................................"
-	echo ".....unblock WiFi"
+	echo "LORIDANE - unblock WiFi"
 
 	#WLAN has to be unblocked
 	rfkill unblock wlan
@@ -153,21 +155,21 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	echo "wpa_key_mgmt=WPA-PSK">>"/etc/hostapd/hostapd.conf"
 	echo "wpa_pairwise=TKIP">>"/etc/hostapd/hostapd.conf"
 	echo "rsn_pairwise=CCMP">>"/etc/hostapd/hostapd.conf"
-	echo ".....Done!........................................................................"
+	echo "LORIDANE - Done!........................................................................"
 	echo ".................................................................................."
 
 	if whiptail --yesno "Would you like to enable WiFi accesspoint as a service?" 30 80 ; then
 		systemctl enable hostapd.service
-		echo "Done!"
+		echo "LORIDANE - Done!"
 	else
-		echo "Okay, hostapd.service not enabled"
+		echo "LORIDANE - Okay, hostapd.service not enabled"
 	fi
 
 	if whiptail --yesno "Start accesspoint now?" 30 80; then
 		systemctl start hostapd.service
-		echo "Done!"
+		echo "LORIDANE - Done!"
 	else
-		echo "Okay, not started"
+		echo "LORIDANE - Okay, not started"
 	fi
 
 	whiptail --msgbox "You can start and stop the accesspoint via
@@ -179,7 +181,7 @@ fi
 if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	sudo -u pi sh fetchNR.sh
 	systemctl enable nodered.service
-	echo "Copying some files and set up directories"
+	echo "LORIDANE - Copying some files and set up directories"
 	mkdir -p /home/pi/LORIDANE/config
 	mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
 	mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
@@ -189,15 +191,15 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	mkdir -p /home/pi/LORIDANE/database
 	cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
 	cd /home/pi/.node-red
-	echo "Installing Additional Modules"
+	echo "LORIDANE - Installing Additional Modules"
 	npm install node-red-dashboard
 	npm install node-red-contrib-fs
 	npm install node-red-contrib-throttle
 	npm install cryptojs
 	npm install crypto
 
-	echo "Enabled NODERED Service"
-	echo "Restart NODE RED"
+	echo "LORIDANE - Enabled NODERED Service"
+	echo "LORIDANE - Restart NODE RED"
 
 	whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is not appropriate" 30 90 ;
 	sudo nano +83,24 /home/pi/.node-red/settings.js
@@ -205,13 +207,13 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 fi
 
 if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80 ; then
-	echo "Installing MQTT Broker"
+	echo "LORIDANE - Installing MQTT Broker"
 	apt-get install mosquitto -y
 	systemctl unmask mosquitto
 	echo "......................................................."
-	echo "setting up Passwordfile for MQTT"
-	echo "you will be asked to input the password of your choice now"
-	echo "Username is mqtusr"
+	echo "LORIDANE - setting up Passwordfile for MQTT"
+	echo "LORIDANE - you will be asked to input the password of your choice now"
+	echo "LORIDANE - Username is mqtusr"
 	whiptail --msgbox "Please Enter a Password for your MQTT-Username: mqtusr" 30 80;
 	mosquitto_passwd -c /etc/mosquitto/passwd mqtusr
 	#Do
@@ -226,10 +228,10 @@ fi
 cd /home/pi/LORIDANE
 chown -R pi *
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
-	echo "Okay. Shutdown"
+	echo "LORIDANE - Okay. Shutdown"
 	node-red-stop
 	reboot now
 else
-	echo "Okay, no reboot. Script finished"
+	echo "LORIDANE - Okay, no reboot. Script finished"
 fi
 exit 0
