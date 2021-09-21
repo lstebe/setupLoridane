@@ -847,6 +847,17 @@
         }
     },
     {
+        "id": "4073e498fd9f7db7",
+        "type": "ui_group",
+        "name": "Change Gateway Settings via USB",
+        "tab": "1809f267.7a279e",
+        "order": 6,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
         "id": "cfe970e8.dec84",
         "type": "function",
         "z": "d7577d7f.0f9b4",
@@ -3106,7 +3117,7 @@
         "type": "function",
         "z": "922120e5.5b086",
         "name": "write config",
-        "func": "writeConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nwriteConfig(100 /**delay in ms*/);\nreturn;",
+        "func": "writeConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nwriteConfig(0 /**delay in ms*/);\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3172,16 +3183,14 @@
         "z": "922120e5.5b086",
         "name": "write config",
         "func": "WC = global.get(\"LORIDANE.funcs.writeConfig\");\nWC(100)\nreturn;",
-        "outputs": 1,
+        "outputs": 0,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
         "x": 1470,
         "y": 1480,
-        "wires": [
-            []
-        ]
+        "wires": []
     },
     {
         "id": "dd36f402.134978",
@@ -3324,7 +3333,7 @@
         "type": "function",
         "z": "1395c386.064e8c",
         "name": "Functions",
-        "func": "funcs = {\n    checkUID: //**validate the device ID*/\n        function checkUID(UID){ //#bool\n            if(UID.length !== 14){\n                return false;\n            }\n            \n            if(!UID.startsWith(\"NO\")&& !UID.startsWith(\"GW\")){\n                return false;\n            }\n            for (index=2;index<UID.length;index++){\n                fit = new RegExp(/([A-F0-9])/).test(UID[index]);\n                if(!fit){\n                return fit;\n                }\n            }\n            return fit;\n        },\n    inRangeOf: //**check if num value is in a range*/\n        function inRangeOf(value,lower,upper){ //#bool\n            if (value >= lower && value <= upper){\n                return true;\n            }\n            return false;\n        },\n    getUIDGW: //**get all Gateway UIDs*/\n        function getUIDGW(){ //#array of strings\n            devices = global.get(\"LORIDANE.devices.gw\");\n            let arr = [];\n            for (var d in devices){\n                arr.push(devices[d].uid);\n            }\n            return arr;\n        },\n    getUIDND: //**get all Node UIDs*/\n        function getUIDND(){ //#array of strings\n            devices = global.get(\"LORIDANE.devices.nodes\");\n            let arr = [];\n            for (var d in devices){\n                arr.push(devices[d].uid);\n            }\n            return arr;\n        },\n    findGW://**find the index of a particular Gateway*/\n        function findGW(UID){ //#integer\n            const devices = global.get(\"LORIDANE.devices.gw\");\n            let i;\n            if(UID.startsWith(\"GW\")){\n                for(i in devices){\n                    if(devices[i].uid == UID)return i;\n                }\n            }\n            return -1;\n        },\n    findNode://**find the index of a particular Node*/\n        function findNode(UID){ //#integer\n            const devices = global.get(\"LORIDANE.devices.nodes\");\n            let i;\n            if(UID.startsWith(\"NO\")){\n                for(i in devices){\n                    if(devices[i].uid == UID)return i;\n                }\n            }\n            return -1;\n        },\n    deleteDevice: //**delete a particular device from memcache*/\n        function deleteDevice(UID){ //#none\n            var devices = global.get(\"LORIDANE.devices\");\n            var nodes = devices.nodes;\n            var gws = devices.gw;\n            let index;\n            index = funcs.findGW(UID);\n            if(index >= 0){\n                gws.splice(index,1);\n                global.set(\"LORIDANE.devices.gw\",gws);\n            }\n            index = funcs.findNode(UID);\n            if(index >= 0){\n                nodes.splice(index,1);\n                global.set(\"LORIDANE.devices.nodes\",nodes);\n            }\n            return;\n        },\n        writeConfig://*write the memcache to the memcache file**/\n            function writeConfig(delaytime){ // milliseconds #bool\n            let executed = true;\n                function writeDelayed(){\n                    const fs = global.get(\"fs\");\n                    var loridane =  global.get(\"LORIDANE\");\n                    const configpath = loridane.settings.path.config;\n                    delete loridane.homepath;\n                    const loridaneString = JSON.stringify(loridane,null,2);\n                    fs.writeFileSync(configpath+\"memCacheLoridane.json\",loridaneString)\n                    return true;\n                }\n                if(delaytime === 0 || delaytime === undefined){\n                    executed = writeDelayed();\n                }else{\n                    setTimeout(writeDelayed,delaytime);\n                }\n            return excuted;\n        },\n        getConfig: //**get the whole configuration object by uid*/\n            function getConfig(uid){ //#object\n                let devices;\n                let device;\n                indexgw = funcs.findGW(uid);\n                indexno = funcs.findNode(uid);\n                \n                if(indexgw != -1){\n                    devices = global.get(\"LORIDANE.devices.gw\")\n                    device = devices[indexgw]\n                }else if(indexno != -1){\n                    devices = global.get(\"LORIDANE.devices.nodes\")\n                    device = devices[indexno]\n                }\n                return device;\n            },\n            math:{//**matematical functions*/\n                getMean://**mean of an array*/\n                    function getMean(arr){ //#double\n                        mean = arr.reduce((a,b) => a+b)/arr.length;\n                        return mean;\n                    },\n                getSmooth://**running mean of an array by smooting interval*/\n                    function getSmooth(arr,interval){ //#array\n                        smoothened = [];\n                        getMean = funcs.math.getMean;\n                        const arrcpy = arr;\n                        intHalf = Math.floor(interval/2);\n                        for(i=0;i<intHalf;i++){\n                            smoothened.push(arr[i]);\n                        }\n                        for(i = intHalf; i < arr.length - intHalf; i++){\n                            smoothened.push(getMean(arrcpy.slice(i-intHalf,i+interval)));\n                        }\n                        for(i=arr.length - intHalf;i<arr.length;i++){\n                            smoothened.push(arr[i]);\n                        }\n                        return smoothened;\n                    },\n                getCDS://**array with the numeric first or second derivative*/\n                    function getCDS(arr,order){ // # array\n                        let CDS = [0];\n                        const len = arr.length;\n                        switch(order){\n                            case 1:\n                                for(i=1;i<len-1;i++){\n                                    CDS.push((arr[i+1]-arr[i-1])/2);\n                                }\n                                break;\n                            case 2:\n                                for(i=1;i<len-1;i++){\n                                    CDS.push((arr[i+1] -2*arr[i]+arr[i-1]));\n                                }\n                                break;\n                        }\n                        CDS.push(0);\n                        return CDS;\n                    }\n                }\n};\nglobal.set(\"LORIDANE.funcs\",funcs);\nreturn;",
+        "func": "funcs = {\n    checkUID: //**validate the device ID*/\n        function checkUID(UID){ //#bool\n            if(UID.length !== 14){\n                return false;\n            }\n            \n            if(!UID.startsWith(\"NO\")&& !UID.startsWith(\"GW\")){\n                return false;\n            }\n            for (index=2;index<UID.length;index++){\n                fit = new RegExp(/([A-F0-9])/).test(UID[index]);\n                if(!fit){\n                return fit;\n                }\n            }\n            return fit;\n        },\n    inRangeOf: //**check if num value is in a range*/\n        function inRangeOf(value,lower,upper){ //#bool\n            if (value >= lower && value <= upper){\n                return true;\n            }\n            return false;\n        },\n    getUIDGW: //**get all Gateway UIDs*/\n        function getUIDGW(){ //#array of strings\n            devices = global.get(\"LORIDANE.devices.gw\");\n            let arr = [];\n            for (var d in devices){\n                arr.push(devices[d].uid);\n            }\n            return arr;\n        },\n    getUIDND: //**get all Node UIDs*/\n        function getUIDND(){ //#array of strings\n            devices = global.get(\"LORIDANE.devices.nodes\");\n            let arr = [];\n            for (var d in devices){\n                arr.push(devices[d].uid);\n            }\n            return arr;\n        },\n    findGW://**find the index of a particular Gateway*/\n        function findGW(UID){ //#integer\n            const devices = global.get(\"LORIDANE.devices.gw\");\n            let i;\n            if(UID.startsWith(\"GW\")){\n                for(i in devices){\n                    if(devices[i].uid == UID)return i;\n                }\n            }\n            return -1;\n        },\n    findNode://**find the index of a particular Node*/\n        function findNode(UID){ //#integer\n            const devices = global.get(\"LORIDANE.devices.nodes\");\n            let i;\n            if(UID.startsWith(\"NO\")){\n                for(i in devices){\n                    if(devices[i].uid == UID)return i;\n                }\n            }\n            return -1;\n        },\n    deleteDevice: //**delete a particular device from memcache*/\n        function deleteDevice(UID){ //#none\n            var devices = global.get(\"LORIDANE.devices\");\n            var nodes = devices.nodes;\n            var gws = devices.gw;\n            let index;\n            index = funcs.findGW(UID);\n            if(index >= 0){\n                gws.splice(index,1);\n                global.set(\"LORIDANE.devices.gw\",gws);\n            }\n            index = funcs.findNode(UID);\n            if(index >= 0){\n                nodes.splice(index,1);\n                global.set(\"LORIDANE.devices.nodes\",nodes);\n            }\n            return;\n        },\n        writeConfig://*write the memcache to the memcache file**/\n            function writeConfig(delaytime){ // milliseconds #bool\n            let executed = true;\n                function writeDelayed(){\n                    const fs = global.get(\"fs\");\n                    var loridane =  global.get(\"LORIDANE\");\n                    const configpath = loridane.settings.path.config;\n                    delete loridane.homepath;\n                    const loridaneString = JSON.stringify(loridane,null,2);\n                    fs.writeFileSync(configpath+\"memCacheLoridane.json\",loridaneString)\n                    return true;\n                }\n                if(delaytime === 0 || delaytime === undefined){\n                    executed = writeDelayed();\n                }else{\n                    setTimeout(writeDelayed,delaytime);\n                }\n            return executed;\n        },\n        getConfig: //**get the whole configuration object by uid*/\n            function getConfig(uid){ //#object\n                let devices;\n                let device;\n                indexgw = funcs.findGW(uid);\n                indexno = funcs.findNode(uid);\n                \n                if(indexgw != -1){\n                    devices = global.get(\"LORIDANE.devices.gw\")\n                    device = devices[indexgw]\n                }else if(indexno != -1){\n                    devices = global.get(\"LORIDANE.devices.nodes\")\n                    device = devices[indexno]\n                }\n                return device;\n            },\n            math:{//**matematical functions*/\n                getMean://**mean of an array*/\n                    function getMean(arr){ //#double\n                        mean = arr.reduce((a,b) => a+b)/arr.length;\n                        return mean;\n                    },\n                getSmooth://**running mean of an array by smooting interval*/\n                    function getSmooth(arr,interval){ //#array\n                        smoothened = [];\n                        getMean = funcs.math.getMean;\n                        const arrcpy = arr;\n                        intHalf = Math.floor(interval/2);\n                        for(i=0;i<intHalf;i++){\n                            smoothened.push(arr[i]);\n                        }\n                        for(i = intHalf; i < arr.length - intHalf; i++){\n                            smoothened.push(getMean(arrcpy.slice(i-intHalf,i+interval)));\n                        }\n                        for(i=arr.length - intHalf;i<arr.length;i++){\n                            smoothened.push(arr[i]);\n                        }\n                        return smoothened;\n                    },\n                getCDS://**array with the numeric first or second derivative*/\n                    function getCDS(arr,order){ // # array\n                        let CDS = [0];\n                        const len = arr.length;\n                        switch(order){\n                            case 1:\n                                for(i=1;i<len-1;i++){\n                                    CDS.push((arr[i+1]-arr[i-1])/2);\n                                }\n                                break;\n                            case 2:\n                                for(i=1;i<len-1;i++){\n                                    CDS.push((arr[i+1] -2*arr[i]+arr[i-1]));\n                                }\n                                break;\n                        }\n                        CDS.push(0);\n                        return CDS;\n                    }\n                }\n};\nglobal.set(\"LORIDANE.funcs\",funcs);\nreturn;",
         "outputs": 0,
         "noerr": 0,
         "initialize": "",
@@ -3793,7 +3802,7 @@
         "type": "function",
         "z": "4e984df.de567b4",
         "name": "save admission",
-        "func": "wantAdmittance = global.get(\"LORIDANE.admit\");\nadmitted = msg.payload;\nfindGW = global.get(\"findGW\");\nfindNode = global.get(\"findNode\");\ndeleteDevice = global.get(\"LORIDANE.funcs.deleteDevice\");\nwriteConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nignorelist = global.get(\"LORIDANE.ignorelist\");\n\nfor (var device of wantAdmittance){\n    if(admitted.indexOf(device) >= -1){\n        wantAdmittance.splice(wantAdmittance.indexOf(device),1);\n    }\n}\n\n\nfor(device of wantAdmittance){\n    deleteDevice(device)\n    ignorelist.push(device)\n}\nglobal.set([\"LORIDANE.admit\",\"LORIDANE.ignorelist\"],[[],ignorelist]);\nwriteConfig();\nreturn;",
+        "func": "let wantAdmittance = global.get(\"LORIDANE.admit\");\nlet admitted = msg.payload;\nconst findGW = global.get(\"LORIDANE.funcs.findGW\");\nconst findNode = global.get(\"LORIDANE.funcs.findNode\");\nconst deleteDevice = global.get(\"LORIDANE.funcs.deleteDevice\");\nconst writeConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nlet ignorelist = global.get(\"LORIDANE.ignorelist\");\n\nfor (var device of wantAdmittance){\n    if(admitted.indexOf(device) >= -1){\n        wantAdmittance.splice(wantAdmittance.indexOf(device),1);\n    }\n}\n\n\nfor(device of wantAdmittance){\n    deleteDevice(device)\n    ignorelist.push(device)\n}\nglobal.set([\"LORIDANE.admit\",\"LORIDANE.ignorelist\"],[[],ignorelist]);\nwriteConfig();\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -5186,7 +5195,7 @@
         "type": "function",
         "z": "e1d714ec.ccad48",
         "name": "Set DataSet",
-        "func": "if(msg.topic == \"offset\"){\n    UID = msg.data.node\n    reading = parseFloat(msg.payload.set.replace(\",\",\".\"));\n    power = 0;\n    global.set(`LORIDANE.data.${UID}.lastreading`,reading);\n    return;\n}\n//if (isNaN(msg.payload)){return}\ndata = msg.data\nUID = data.node;\ntime = new Date(data.lastSeen)||new Date.now();\nshowtime = time.toLocaleString(\"de-DE\");\ndate = time.toISOString().substr(0,7);\nUSER = global.get(\"LORIDANE.LinuxUsername\")\n\n\n//----------------------------------------\n//Calc power\nfunction getpower(input){\n    const now = Date.now();\n    const lasttime = flow.get(`data.${UID}.lasttime`)||0;\n    flow.set(`data.${UID}.lasttime`,now);\n    const msInhours = 3600000;\n\n    interval = now-lasttime;\n    ivperhour= msInhours / interval;\n    value = Math.round(input * ivperhour*100)/100;\n\n    if(value > 55000){\n        return;\n    }\n    return value;\n}\n//------------------------------------------\n//set object\nlastreading = global.get(`LORIDANE.data.${UID}.lastreading`)||0;\nreading = lastreading + (msg.payload.watthours/1000);\nconst obj = {\n    reading : reading,\n    power : msg.payload.watts,\n    timestamp : data.lastSeen,\n    time:showtime,\n    powerunit: \"Watt\",\n    readingunit: \"kWh\"\n}\nif(obj.reading > 0)global.set(`LORIDANE.data.${UID}.lastreading`,reading);\nif(obj.reading !== null && obj.power !== null)msg.filename = `/home/${USER}/LORIDANE/database/${UID}/${UID}_${date}.json`;\nmsg.payload = obj;\n\nreturn msg;",
+        "func": "if(msg.topic == \"offset\"){\n    UID = msg.data.node\n    reading = parseFloat(msg.payload.set.replace(\",\",\".\"));\n    power = 0;\n    global.set(`LORIDANE.data.${UID}.lastreading`,reading);\n    return;\n}\n//if (isNaN(msg.payload)){return}\ndata = msg.data\nUID = data.node;\ntime = new Date(data.lastSeen)||new Date.now();\nshowtime = time.toLocaleString(\"de-DE\");\ndate = time.toISOString().substr(0,7);\nUSER = global.get(\"LORIDANE.LinuxUsername\")\nwriteConfig = global.get(\"LORIDANE.funcs.writeConfig\");\n\n//----------------------------------------\n//Calc power\nfunction getpower(input){\n    const now = Date.now();\n    const lasttime = flow.get(`data.${UID}.lasttime`)||0;\n    flow.set(`data.${UID}.lasttime`,now);\n    const msInhours = 3600000;\n\n    interval = now-lasttime;\n    ivperhour= msInhours / interval;\n    value = Math.round(input * ivperhour*100)/100;\n\n    if(value > 55000){\n        return;\n    }\n    return value;\n}\n//------------------------------------------\n//set object\nlastreading = global.get(`LORIDANE.data.${UID}.lastreading`)||0;\nreading = lastreading + (msg.payload.watthours/1000);\nconst obj = {\n    reading : reading,\n    power : msg.payload.watts,\n    timestamp : data.lastSeen,\n    time:showtime,\n    powerunit: \"Watt\",\n    readingunit: \"kWh\"\n}\nif(obj.reading > 0)global.set(`LORIDANE.data.${UID}.lastreading`,reading);\nif(obj.reading !== null && obj.power !== null){\n    msg.filename = `/home/${USER}/LORIDANE/database/${UID}/${UID}_${date}.json`;\n    writeConfig();\n}\nmsg.payload = obj;\n\nreturn;//  msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -6294,5 +6303,202 @@
                 "bd8993296d192541"
             ]
         ]
+    },
+    {
+        "id": "058480b5f3106a0f",
+        "type": "serial in",
+        "z": "a4cddca9.8d353",
+        "name": "Listen to device",
+        "serial": "d726f7d4.e188a8",
+        "x": 200,
+        "y": 400,
+        "wires": [
+            [
+                "e43c4a98f8845f65",
+                "44457db1a7ee2979",
+                "a5e08b0852fdc4a5"
+            ]
+        ]
+    },
+    {
+        "id": "90e6f5b4d8fc09de",
+        "type": "serial out",
+        "z": "a4cddca9.8d353",
+        "name": "Write to device",
+        "serial": "d726f7d4.e188a8",
+        "x": 820,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "e43c4a98f8845f65",
+        "type": "function",
+        "z": "a4cddca9.8d353",
+        "name": "",
+        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\nmsg = {payload: trigger};\n\ncases = [\n    \"Please Enter Your WiFi-SSID\",\n    \"Please Enter Your WiFi-Password\",\n    \"Please Enter the Address Of Your MQTT Broker without the Port\",\n    \"Please Enter the Username Of Your MQTT Broker\",\n    \"Please Enter the Password for Your MQTT Broker\",\n    ]\n\nfor(var pat of cases){\n    if (trigger.includes(pat)){\n        return msg;\n    }else{\n        continue;  \n    }\n}\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 400,
+        "wires": [
+            [
+                "c5254889fef66a08",
+                "e38687305688f438"
+            ]
+        ]
+    },
+    {
+        "id": "c5254889fef66a08",
+        "type": "ui_toast",
+        "z": "a4cddca9.8d353",
+        "position": "prompt",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "Input Dialog Creds",
+        "x": 590,
+        "y": 400,
+        "wires": [
+            [
+                "90e6f5b4d8fc09de",
+                "e38687305688f438"
+            ]
+        ]
+    },
+    {
+        "id": "073fd772b8729cb0",
+        "type": "ui_button",
+        "z": "a4cddca9.8d353",
+        "name": "",
+        "group": "4073e498fd9f7db7",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "WiFi Credentials",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "wifi",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 660,
+        "y": 360,
+        "wires": [
+            [
+                "90e6f5b4d8fc09de"
+            ]
+        ]
+    },
+    {
+        "id": "28a2bcb26b1888ee",
+        "type": "ui_button",
+        "z": "a4cddca9.8d353",
+        "name": "",
+        "group": "4073e498fd9f7db7",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "MQTT Credentials",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "mqtt",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 670,
+        "y": 320,
+        "wires": [
+            [
+                "90e6f5b4d8fc09de"
+            ]
+        ]
+    },
+    {
+        "id": "44457db1a7ee2979",
+        "type": "debug",
+        "z": "a4cddca9.8d353",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 390,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "e38687305688f438",
+        "type": "debug",
+        "z": "a4cddca9.8d353",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "a5e08b0852fdc4a5",
+        "type": "function",
+        "z": "a4cddca9.8d353",
+        "name": "Confirmation",
+        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\n\nmsg = {payload: trigger, topic: \"Answer:\"};\nif(trigger.includes(\"Message arrived\"))return;\ncases = [\n    \", IP address:\",\n    \"Please Enter Your WiFi-Password\",\n    \"[WIFI] Connecting to\",\n    \"MQTT Credentials updated\",\n    \"Subscribing to topic:\",\n    \"lora/GW\"\n    ]\n\nfor(var pat of cases){\n    if (trigger.includes(pat)){\n        return msg;\n    }else{\n        continue;  \n    }\n}\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 350,
+        "y": 480,
+        "wires": [
+            [
+                "709fd53ca51a9035"
+            ]
+        ]
+    },
+    {
+        "id": "709fd53ca51a9035",
+        "type": "ui_toast",
+        "z": "a4cddca9.8d353",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 470,
+        "y": 540,
+        "wires": []
     }
 ]
