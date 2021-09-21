@@ -223,7 +223,8 @@ if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80
 else
 	echo "OK"
 fi
-
+cd /home/pi/LORIDANE
+chown -R pi *
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 	echo "Okay. Shutdown"
 	node-red-stop
