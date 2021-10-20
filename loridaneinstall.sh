@@ -33,7 +33,7 @@ fi
 
 datafolder=`pwd`
 cd .. 
-homedir = `pwd`
+homedir=`pwd`
 cd "$datafolder"
 echo "LORIDANE - Found Homedirecory as $homedir"
 echo "LORIDANE - Data Folder is $datafolder"
