@@ -31,7 +31,10 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Set System Timezone to E
 	timedatectl set-timezone Europe/Berlin
 fi
 
+datafolder=`pwd`
+cd
 homedir=`pwd`
+cd "$datafolder"
 echo "LORIDANE - Found Homedirecory as $homedir"
 echo "Press Ctrl+C to Cancel"
 sleep 5
