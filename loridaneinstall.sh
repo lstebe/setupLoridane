@@ -32,8 +32,8 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Set System Timezone to E
 fi
 
 datafolder=`pwd`
-cd
-homedir=$HOME
+cd .. 
+homedir = `pwd`
 cd "$datafolder"
 echo "LORIDANE - Found Homedirecory as $homedir"
 echo "LORIDANE - Data Folder is $datafolder"
