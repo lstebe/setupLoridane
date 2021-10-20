@@ -33,9 +33,10 @@ fi
 
 datafolder=`pwd`
 cd
-homedir=`pwd`
+homedir=$HOME
 cd "$datafolder"
 echo "LORIDANE - Found Homedirecory as $homedir"
+echo "LORIDANE - Data Folder is $datafolder"
 echo "Press Ctrl+C to Cancel"
 sleep 5
 echo "........................................................................"
