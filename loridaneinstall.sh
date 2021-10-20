@@ -31,7 +31,10 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Set System Timezone to E
 	timedatectl set-timezone Europe/Berlin
 fi
 
-
+homedir=`pwd`
+echo "LORIDANE - Found Homedirecory as $homedir"
+echo "Press Ctrl+C to Cancel"
+sleep 5
 echo "........................................................................"
 #Install needed Packages
 echo "LORIDANE - Expanding FS"
@@ -77,7 +80,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	echo "LORIDANE - with"
 	echo "LORIDANE - interface=wlan0"
 	echo "LORIDANE - domain=wlan"
-	echo "LORIDANE - address=/pi.wlangw/$routerip"
+	echo "LORIDANE - address=/loridane.gw/$routerip"
 	echo "........................................................................"
 	sleep 3
 	echo "interface=wlan0 # Listening interface">>"/etc/dnsmasq.conf"
@@ -182,15 +185,15 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	sudo -u pi sh fetchNR.sh
 	systemctl enable nodered.service
 	echo "LORIDANE - Copying some files and set up directories"
-	mkdir -p /home/pi/LORIDANE/config
-	mv /home/pi/.node-red/flows.json /home/pi/.node-red/flows.json.orig
-	mv /home/pi/.node-red/settings.js /home/pi/.node-red/settings.js.orig
-	cp flows_loridane.json /home/pi/.node-red/flows_loridane.json
-	cp flows_loridane_cred.json /home/pi/.node-red/flows_loridane_cred.json
-	cp settings.js /home/pi/.node-red/settings.js
-	mkdir -p /home/pi/LORIDANE/database
-	cp loridaneConfig.json /home/pi/LORIDANE/config/loridaneConfig.json
-	cd /home/pi/.node-red
+	mkdir -p "$homedir/LORIDANE/config"
+	mv "$homedir/.node-red/flows.json" "$homedir/.node-red/flows.json.orig"
+	mv "$homedir/.node-red/settings.js" "$homedir/.node-red/settings.js.orig"
+	cp flows_loridane.json "$homedir/.node-red/flows_loridane.json"
+	cp flows_loridane_cred.json "$homedir/.node-red/flows_loridane_cred.json"
+	cp settings.js "$homedir/.node-red/settings.js"
+	mkdir -p "$homedir/LORIDANE/database"
+	cp loridaneConfig.json "$homedir/LORIDANE/config/loridaneConfig.json"
+	cd "$homedir/.node-red"
 	echo "LORIDANE - Installing Additional Modules"
 	npm install node-red-dashboard
 	npm install node-red-contrib-fs
@@ -202,7 +205,7 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	echo "LORIDANE - Restart NODE RED"
 
 	whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is not appropriate" 30 90 ;
-	sudo nano +83,24 /home/pi/.node-red/settings.js
+	sudo nano +83,24 "$homedir/.node-red/settings.js"
 	echo "......................................................."
 fi
 
@@ -225,7 +228,7 @@ if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80
 else
 	echo "OK"
 fi
-cd /home/pi/LORIDANE
+cd "$homedir/LORIDANE"
 chown -R pi *
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 	echo "LORIDANE - Okay. Shutdown"
