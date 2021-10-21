@@ -31,6 +31,20 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Set System Timezone to E
 	timedatectl set-timezone Europe/Berlin
 fi
 
+if whiptail --yesno --yes-button Yes! --no-button "No, I did that" "Update the apt repositories first?" 30 80 ;
+	then
+	echo "........................................................................"
+	##Install needed Packages and running initial tasks
+	echo "LORIDANE - Expanding FS"
+	raspi-config --expand-rootfs
+	echo "LORIDANE - Updating Repos"
+	apt-get update
+	apt-get upgrade -y
+	echo "........................................................................"
+else
+	echo "Cool"
+fi
+
 ## Save home and installation folder to a variable
 datafolder=`pwd`
 cd .. 
@@ -40,14 +54,7 @@ echo "LORIDANE - Found Homedirecory as $homedir"
 echo "LORIDANE - Data Folder is $datafolder"
 echo "Press Ctrl+C to Cancel"
 sleep 5
-echo "........................................................................"
-##Install needed Packages and running initial tasks
-echo "LORIDANE - Expanding FS"
-raspi-config --expand-rootfs
-echo "LORIDANE - Updating Repos"
-apt-get update
-apt-get upgrade -y
-echo "........................................................................"
+
 
 ## Ask user for permission to create a wifi AP
 if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Point?" 30 80 ;
