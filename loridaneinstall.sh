@@ -3,11 +3,11 @@ echo "#.......This script will now install all dependencies for a routed WiFi Ac
 echo ".......as a service."
 #
 whiptail --msgbox "This script will set up a ROUTED (Own IP range) AP to your RasPi like:
-                                       +- RPi -------+
-                                     +---+ 10.10.0.2   |          +-Loridane GW +
-                                     |   |Loridane Server +-)))  (((-+   Client |
-                                     |   | 192.168.4.1 |          |192.168.4.100|
-                                     |   +-------------+          +-------------+
+                                         +- RPi ----------+
+                                     +---+ 10.10.0.2      |          +-Loridane GW +
+                                     |   |Loridane Server +-)))  (((-+     Client |
+                                     |   | 192.168.4.1    |          |192.168.4.100|
+                                     |   +----------------+          +-------------+
                  +- Router ----+     |
                  | Firewall    |     |   +- PC#2 ------+
 (Internet)---WAN-+ DHCP server +-LAN-+---+ 10.10.0.3   |
