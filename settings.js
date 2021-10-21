@@ -334,8 +334,8 @@ module.exports = {
     // Customising the editor
     editorTheme: {
         menu: { "menu-item-help": {
-            label: "Node-RED Pi Website",
-            url: "http://nodered.org/docs/hardware/raspberrypi.html"
+            label: "Loridane GitHub",
+            url: "https://github.com/lstebe/setupLoridane"
         } },
         projects: {
             // To enable the Projects feature, set this value to true
