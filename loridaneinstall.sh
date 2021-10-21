@@ -4,8 +4,8 @@ echo ".......as a service."
 #
 whiptail --msgbox "This script will set up a ROUTED (Own IP range) AP to your RasPi like:
                                        +- RPi -------+
-                                     +---+ 10.10.0.2   |          +- Laptop ----+
-                                     |   |     WLAN AP +-)))  (((-+ WLAN Client |
+                                     +---+ 10.10.0.2   |          +-Loridane GW +
+                                     |   |Loridane Server +-)))  (((-+   Client |
                                      |   | 192.168.4.1 |          |192.168.4.100|
                                      |   +-------------+          +-------------+
                  +- Router ----+     |
@@ -17,7 +17,7 @@ whiptail --msgbox "This script will set up a ROUTED (Own IP range) AP to your Ra
                                      +---+ 10.10.0.4   |
                                          +-------------+" 30 90 ;
 
-#OK
+## Ask User for permission to install
 if whiptail --yesno --yes-button OK --no-button Cancel "If you don't want this, press Cancel" 30 80 ;
 	then
 	echo "Cool"
@@ -31,6 +31,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Set System Timezone to E
 	timedatectl set-timezone Europe/Berlin
 fi
 
+## Save home and installation folder to a variable
 datafolder=`pwd`
 cd .. 
 homedir=`pwd`
@@ -40,7 +41,7 @@ echo "LORIDANE - Data Folder is $datafolder"
 echo "Press Ctrl+C to Cancel"
 sleep 5
 echo "........................................................................"
-#Install needed Packages
+##Install needed Packages and running initial tasks
 echo "LORIDANE - Expanding FS"
 raspi-config --expand-rootfs
 echo "LORIDANE - Updating Repos"
@@ -48,6 +49,7 @@ apt-get update
 apt-get upgrade -y
 echo "........................................................................"
 
+## Ask user for permission to create a wifi AP
 if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Point?" 30 80 ;
 	then
 	echo "LORIDANE - Installing HostAPD"
@@ -64,7 +66,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	192.168.4.1\n
 	Do you want to change it?" 30 80; then
 		routerip=$(whiptail --inputbox "Set an IP address:" 20 30 192.168.4.1 3>&1 1>&2 2>&3)
-		echo "	static ip_address=pi.wlangw/24">>'/etc/dhcpcd.conf'
+		echo "	static ip_address=loridane.gw/24">>'/etc/dhcpcd.conf'
 		echo "LORIDANE - Done. Set IP to $routerip"
 	else
 		echo "	static ip_address=$routerip">>"/etc/dhcpcd.conf"
@@ -108,13 +110,13 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 	fi
 
 
-	echo "domain=wlan">>"/etc/dnsmasq.conf"
+	echo "domain=gw">>"/etc/dnsmasq.conf"
 
-	#Example SSID of the WiFi Network
+	##Example SSID of the WiFi Network
 	ssid="Loridane-01"
 	ssid=$( whiptail --inputbox "Please enter the SSID your WiFi should have:" 20 30 Loridane-02 3>&1 1>&2 2>&3 )
 
-	#pi.wlan is the DNS name of the pi
+	##loridane.gw is the DNS name of the pi
 	echo "address=/$ssid/$routerip">>"/etc/dnsmasq.conf"
 
 	echo "........................................................................"
@@ -186,6 +188,7 @@ if whiptail --yesno --yes-button OK --no-button Cancel "Install a WiFi Access-Po
 fi
 
 if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
+	## Installing NodeRed as user "pi"
 	sudo -u pi sh fetchNR.sh
 	systemctl enable nodered.service
 	echo "LORIDANE - Copying some files and set up directories"
@@ -213,6 +216,7 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	echo "......................................................."
 fi
 
+## Ask user for permission to install MOSQUITTO
 if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80 ; then
 	echo "LORIDANE - Installing MQTT Broker"
 	apt-get install mosquitto -y
@@ -233,6 +237,8 @@ else
 	echo "OK"
 fi
 cd "$homedir/LORIDANE"
+
+## change ownership of the loridane folder to the user as anything is installed as root
 chown -R pi *
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 	echo "LORIDANE - Okay. Shutdown"
