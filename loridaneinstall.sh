@@ -214,7 +214,9 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	npm install node-red-contrib-throttle
 	npm install cryptojs
 	npm install crypto
-
+	
+	#Set RAM space controlled by Node.js
+	node-red-pi --max-old-space-size=1024
 	echo "LORIDANE - Enabled NODERED Service"
 	echo "LORIDANE - Restart NODE RED"
 
