@@ -72,7 +72,7 @@ module.exports = {
 
     // To enabled pretty-printing of the flow within the flow file, set the following
     //  property to true:
-    //flowFilePretty: true,
+    flowFilePretty: true,
 
     // By default, credentials are encrypted in storage using a generated key. To
     // specify your own secret, set the following property.
@@ -131,7 +131,7 @@ module.exports = {
         type: "credentials",
         users: [{
             username: "loridaneadmin",
-            password: "$2b$08$0WNgniCAqYASJYY8p9yfc.cSJvAB.fDLhYdyjpJ1EsjWv/hYzhVMC",
+            password: "$2b$08$4MeV8qO7F1aflwbGe49hDed2Rna/i036C3osdynnMC9LvcjHZpvMu",
             permissions: "*"
         }]
     },
@@ -178,7 +178,7 @@ module.exports = {
     // The following property can be used to disable the editor. The admin API
     // is not affected by this option. To disable both the editor and the admin
     // API, use either the httpRoot or httpAdminRoot properties
-    disableEditor: true,
+    disableEditor: false,
 
     // The following property can be used to configure cross-origin resource sharing
     // in the HTTP nodes.
@@ -252,7 +252,7 @@ module.exports = {
     functionGlobalContext: {
         os:require('os'),
         fs:require("fs"),
-        crjs:require("cryptojs"),
+        crjs:require("crypto-js"),
 	crypto:require("crypto")
     },
 
@@ -334,8 +334,8 @@ module.exports = {
     // Customising the editor
     editorTheme: {
         menu: { "menu-item-help": {
-            label: "Loridane GitHub",
-            url: "https://github.com/lstebe/setupLoridane"
+            label: "Node-RED Pi Website",
+            url: "http://nodered.org/docs/hardware/raspberrypi.html"
         } },
         projects: {
             // To enable the Projects feature, set this value to true

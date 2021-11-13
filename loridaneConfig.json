@@ -4,13 +4,22 @@
 	"config":"/home/pi/LORIDANE/config/",
 	"database":"/home/pi/LORIDANE/database/"
 	},
-
 "_comment":"set here if the payloads of the lora nodes should be encrypted or not, key and initalisation vector must be a 16byte hex-tring and the same in your nodes",
 "encryption":{
-	"engaged":false,
-	"iv":"472B4B6250655368566D597133743677",
-	"key":"576E5A7234753778214125432A462D4A"
+	"engaged":true,
+	"key":"abcdefghijklmnop"
 	},
 "_comment":"The initial frequency the gateway should be listening to, this overrides the gateway setting",
-"freq":867e6
+"freq":867e6,
+"csvDelimiter":";",
+"syncInterval":233,
+"_comment":"If The Gateway is attached to USB at the server the ui configuration can be automated",
+"gatewayConfig":{
+	"automatic":true,
+	"ssid":"Loridane-02",
+	"wpwd":"ltwitwptw",
+	"broker":"192.168.4.1",
+	"user":"mqtusr",
+	"mpwd":"ltwitwptw"
+	}
 }
