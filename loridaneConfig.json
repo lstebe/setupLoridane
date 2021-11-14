@@ -15,11 +15,11 @@
 "syncInterval":233,
 "_comment":"If The Gateway is attached to USB at the server the ui configuration can be automated",
 "gatewayConfig":{
-	"automatic":true,
+	"automatic":false,
 	"ssid":"Loridane-02",
-	"wpwd":"ltwitwptw",
+	"wpwd":"a-password",
 	"broker":"192.168.4.1",
 	"user":"mqtusr",
-	"mpwd":"ltwitwptw"
+	"mpwd":"a-apssword"
 	}
 }
