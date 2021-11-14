@@ -198,6 +198,7 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	## Installing NodeRed as user "pi"
 	sudo -u pi sh fetchNR.sh
 	systemctl enable nodered.service
+	node-red-stop
 	echo "LORIDANE - Copying some files and set up directories"
 	mkdir -p "$homedir/LORIDANE/config"
 	mv "$homedir/.node-red/flows.json" "$homedir/.node-red/flows.json.orig"
@@ -213,18 +214,18 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	npm install node-red-contrib-fs
 	npm install node-red-contrib-throttle
 	npm install node-red-contrib-opcua
-	npm install cryptojs
+	npm install crypto-js
 	npm install crypto
-	node-red-stop
 	
-	#Set RAM space controlled by Node.js
 	echo "LORIDANE - Enabled NODERED Service"
 	echo "LORIDANE - Restart NODE RED"
 
 	whiptail --msgbox "Please Enter a Credential Secret (like a password) which will be used to hash your passwords, if you think the one set is not appropriate" 30 90 ;
-	sudo nano +83,24 "$homedir/.node-red/settings.js"
+	sudo nano +24,97 "$homedir/.node-red/settings.js"
 	echo "......................................................."
 fi
+
+cd
 
 ## Ask user for permission to install MOSQUITTO
 if whiptail --yesno "Would you like to install a MQTT-Broker (mosquitto)?" 30 80 ; then
@@ -251,6 +252,7 @@ cd "$homedir/LORIDANE"
 ## change ownership of the loridane folder to the user as anything is installed as root
 chown -R pi *
 node-red-stop
+#Set RAM space controlled by Node.js
 node-red-pi --max-old-space-size=1024
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 	echo "LORIDANE - Okay. Shutdown"
