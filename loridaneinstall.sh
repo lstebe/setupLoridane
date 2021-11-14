@@ -215,9 +215,9 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	npm install node-red-contrib-opcua
 	npm install cryptojs
 	npm install crypto
+	node-red-stop
 	
 	#Set RAM space controlled by Node.js
-	node-red-pi --max-old-space-size=1024
 	echo "LORIDANE - Enabled NODERED Service"
 	echo "LORIDANE - Restart NODE RED"
 
@@ -250,11 +250,16 @@ cd "$homedir/LORIDANE"
 
 ## change ownership of the loridane folder to the user as anything is installed as root
 chown -R pi *
+node-red-stop
+node-red-pi --max-old-space-size=1024
 if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? " 30 80 ; then
 	echo "LORIDANE - Okay. Shutdown"
 	node-red-stop
 	reboot now
 else
 	echo "LORIDANE - Okay, no reboot. Script finished"
+	node-red-start
 fi
+
+
 exit 0
