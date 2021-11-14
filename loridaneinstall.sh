@@ -214,6 +214,7 @@ if whiptail --yesno "Would you like to install NODE RED?" 30 80 ; then
 	npm install node-red-contrib-fs
 	npm install node-red-contrib-throttle
 	npm install node-red-contrib-opcua
+	npm install node-red-node-ui-table
 	npm install crypto-js
 	npm install crypto
 	
