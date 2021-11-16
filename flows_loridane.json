@@ -1,393 +1,137 @@
 [
     {
-        "id": "20f0b4a8.24eafc",
-        "type": "tab",
-        "label": "LORIDANE",
-        "disabled": false,
-        "info": ""
-    },
-    {
-        "id": "0b3f1702fe1b5fd1",
-        "type": "tab",
-        "label": "Beispiel Tasks",
-        "disabled": false,
-        "info": ""
-    },
-    {
-        "id": "d7577d7f.0f9b4",
+        "id": "b5aa0f5765475d21",
         "type": "subflow",
-        "name": "LORIDANE - GUI Messages",
+        "name": "MQTT Forwarder",
         "info": "",
         "category": "Loridane",
         "in": [
             {
-                "x": 120,
-                "y": 140,
+                "x": 200,
+                "y": 120,
                 "wires": [
                     {
-                        "id": "cfe970e8.dec84"
-                    },
-                    {
-                        "id": "600536c1.7e8cc8"
-                    },
-                    {
-                        "id": "04de0d0b8bcf8885"
+                        "id": "3126adbea28f66af"
                     }
                 ]
             }
         ],
-        "out": [],
+        "out": [
+            {
+                "x": 840,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "80c1923731d9fae4",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
         "env": [],
         "meta": {},
         "color": "#3FADB5",
-        "icon": "node-red/envelope.svg"
+        "icon": "font-awesome/fa-paper-plane"
     },
     {
-        "id": "c23de0ef.dae5f",
-        "type": "subflow",
-        "name": "LORIDANE - NodeSync",
-        "info": "",
-        "category": "Loridane",
-        "in": [],
-        "out": [],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "font-awesome/fa-clock-o",
-        "status": {
-            "x": 500,
-            "y": 220,
-            "wires": [
-                {
-                    "id": "111ba65b.68a45a",
-                    "port": 0
-                }
+        "id": "3126adbea28f66af",
+        "type": "function",
+        "z": "b5aa0f5765475d21",
+        "name": "analyse payload",
+        "func": "if(msg.payload[0] == \"+\"){\n    return;\n}\n\nlet pay = [];\nlet payloadobject = {};\nconst fullData = msg.data;\n\nif(typeof(msg.payload) != \"number\"){\n    if (msg.payload.includes(\";\")){\n        pay = msg.payload.split(\";\");    \n    }else{\n        pay[0] = msg.payload;\n    }\n}else{\n     pay[0] = msg.payload;\n}\n\n// split payloads to  measure0, measure1,....and so on\nlet i = 0;\nfor(let val of pay){\n    if(typeof(val) == \"number\"){\n        val = parseFloat(val);\n    }\n    payloadobject[`measure${i}`] = val;\n    i++;\n}\n\nmsg.payload = {...payloadobject, ...fullData};\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 120,
+        "wires": [
+            [
+                "80c1923731d9fae4"
             ]
-        }
+        ]
     },
     {
-        "id": "922120e5.5b086",
-        "type": "subflow",
-        "name": "LORIDANE - GUI",
-        "info": "",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 40,
-                "y": 460,
-                "wires": [
-                    {
-                        "id": "fa0f21a7.2fba9"
-                    },
-                    {
-                        "id": "f2230676.6a28f8"
-                    },
-                    {
-                        "id": "60d33b08.42a134"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 1440,
-                "y": 460,
-                "wires": [
-                    {
-                        "id": "53654a49.b88fe4",
-                        "port": 0
-                    },
-                    {
-                        "id": "1733b022.f7d1a",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "node-red-dashboard/ui_button.png"
-    },
-    {
-        "id": "1395c386.064e8c",
-        "type": "subflow",
-        "name": "LORIDANE - Init",
-        "info": "",
-        "category": "Loridane",
-        "in": [],
-        "out": [],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "node-red/cog.svg",
-        "status": {
-            "x": 660,
-            "y": 180,
-            "wires": [
-                {
-                    "id": "dd36f402.134978",
-                    "port": 0
-                }
+        "id": "80c1923731d9fae4",
+        "type": "function",
+        "z": "b5aa0f5765475d21",
+        "name": "Set DataSet",
+        "func": "let data = msg.data\nlet time = new Date(data.lastSeen)||new Date.now();\nlet showtime = time.toLocaleString(\"de-DE\");\nlet date = time.toISOString().substr(0,7);\n\nmsg.payload.time = showtime;\nmsg.payload.timestamp = data.lastSeen;\ndelete msg.payload.lastSeen;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 530,
+        "y": 120,
+        "wires": [
+            [
+                "84383d973c491d60",
+                "c0a3aa7bc8ce6775"
             ]
-        }
+        ]
     },
     {
-        "id": "ada10296.06249",
-        "type": "subflow",
-        "name": "LORIDANE - Send Timedisk",
-        "info": "",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 100,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "e4d7b82.7ce1f48"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 820,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "6dc379ee.b0e338",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "node-red-dashboard/ui_gauge.png",
-        "status": {
-            "x": 580,
-            "y": 180,
-            "wires": [
-                {
-                    "id": "3490e79c.716c88",
-                    "port": 0
-                }
-            ]
-        }
+        "id": "84383d973c491d60",
+        "type": "mqtt out",
+        "z": "b5aa0f5765475d21",
+        "name": "Forward Msg",
+        "topic": "loridane/forwarded/",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "3be33484.0e776c",
+        "x": 730,
+        "y": 160,
+        "wires": []
     },
     {
-        "id": "6712fbef.2d8494",
-        "type": "subflow",
-        "name": "LORIDANE - Acknowledge",
-        "info": "",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 240,
-                "y": 80,
-                "wires": [
-                    {
-                        "id": "1a746dcd.d51fd2"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 480,
-                "y": 80,
-                "wires": [
-                    {
-                        "id": "1a746dcd.d51fd2",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "font-awesome/fa-cloud-download",
-        "status": {
-            "x": 520,
-            "y": 160,
-            "wires": [
-                {
-                    "id": "1d0625f6.98bf6a",
-                    "port": 0
-                }
+        "id": "c0a3aa7bc8ce6775",
+        "type": "function",
+        "z": "b5aa0f5765475d21",
+        "d": true,
+        "name": "set OPC_UA Parameters",
+        "func": "return;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 220,
+        "wires": [
+            [
+                "209a8f28dc1f12d2"
             ]
-        }
+        ]
     },
     {
-        "id": "4e984df.de567b4",
-        "type": "subflow",
-        "name": "LORIDANE - MQTT In",
-        "info": "",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 20,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "088ce0e8085dd6d5"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 520,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "1c0ac556.46e25b",
-                        "port": 0
-                    }
-                ]
-            },
-            {
-                "x": 920,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "f023d975.deb8d8",
-                        "port": 0
-                    }
-                ]
-            },
-            {
-                "x": 1400,
-                "y": 60,
-                "wires": [
-                    {
-                        "id": "af3bda90.002258",
-                        "port": 0
-                    },
-                    {
-                        "id": "b3b76bf0.aef8c8",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "outputLabels": [
-            "raw data output",
-            "processed Payload",
-            "conditional output, acknowledgement and Class A Devices "
-        ],
-        "icon": "node-red/bridge.svg",
-        "status": {
-            "x": 640,
-            "y": 40,
-            "wires": [
-                {
-                    "id": "f7a51ace.7907f8",
-                    "port": 0
-                }
-            ]
-        }
-    },
-    {
-        "id": "2fad0fdc.1d24b",
-        "type": "subflow",
-        "name": "LORIDANE - Downlink",
-        "info": "",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 120,
-                "y": 100,
-                "wires": [
-                    {
-                        "id": "1a95a2d5.655b3d"
-                    }
-                ]
-            }
-        ],
-        "out": [],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "node-red/bridge-dash.svg",
-        "status": {
-            "x": 580,
-            "y": 160,
-            "wires": [
-                {
-                    "id": "1792be97.4020f1",
-                    "port": 0
-                }
-            ]
-        }
-    },
-    {
-        "id": "364ae788.0e6328",
-        "type": "subflow",
-        "name": "LORIDANE - Save new devices",
-        "info": "Accepts two Inputs:\n - MQTT in listening to lora/gateway#\n - Inject node or similar that sends a\n    msg.topic of \"syncfrequency\"\n    if the gateway should listen to the standard frequency of 867MHz for 10 seconds at SF7\n\nIt then will add a configuration-file\nto /home/pi/gateway/\nfor each new Node\n\nIt has 3 Outputs:\n\n 1) Contains every (processed) message the MQTT In      receives in msg.data.\n 2) Should be conected to\n    \"Load Configuration from Files\", if that is wanted\n 3) Received Raw MQTT on msg.payload\n    and the configuration Data if new device binding is initiated via msg.topic = \"syncfrequency\"",
-        "category": "Loridane",
-        "in": [
-            {
-                "x": 80,
-                "y": 240,
-                "wires": [
-                    {
-                        "id": "82c27a6c.0a2258"
-                    },
-                    {
-                        "id": "77abdcc2.fad7c4"
-                    }
-                ]
-            }
-        ],
-        "out": [
-            {
-                "x": 940,
-                "y": 220,
-                "wires": [
-                    {
-                        "id": "aecffc67.3d552",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
-        "env": [],
-        "meta": {
-            "license": "GPL-3.0"
-        },
-        "color": "#3FADB5",
-        "icon": "node-red/leveldb.png",
-        "status": {
-            "x": 420,
-            "y": 380,
-            "wires": [
-                {
-                    "id": "bd6188af.c82468",
-                    "port": 0
-                }
-            ]
-        }
+        "id": "209a8f28dc1f12d2",
+        "type": "OpcUa-Client",
+        "z": "b5aa0f5765475d21",
+        "d": true,
+        "endpoint": "",
+        "action": "write",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": 10,
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "name": "",
+        "x": 940,
+        "y": 220,
+        "wires": [
+            []
+        ]
     },
     {
         "id": "b9c36c50122d3534",
@@ -401,6 +145,273 @@
         "meta": {},
         "color": "#3FADB5",
         "icon": "node-red-dashboard/ui_dropdown.png"
+    },
+    {
+        "id": "165abd08ab5997d3",
+        "type": "serial in",
+        "z": "b9c36c50122d3534",
+        "name": "Listen to device",
+        "serial": "d726f7d4.e188a8",
+        "x": 100,
+        "y": 160,
+        "wires": [
+            [
+                "489395b840d57d55",
+                "20afc46063fc460e",
+                "d0db093491b0175f"
+            ]
+        ]
+    },
+    {
+        "id": "9443f601f2e54a8b",
+        "type": "serial out",
+        "z": "b9c36c50122d3534",
+        "name": "Write to device",
+        "serial": "d726f7d4.e188a8",
+        "x": 840,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "489395b840d57d55",
+        "type": "function",
+        "z": "b9c36c50122d3534",
+        "name": "parse serial input stream",
+        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\nmsg = {payload: trigger};\n\ncases = [\n    \"Please Enter Your WiFi-SSID\",\n    \"Please Enter Your WiFi-Password\",\n    \"Please Enter the Address Of Your MQTT Broker without the Port\",\n    \"Please Enter the Username Of Your MQTT Broker\",\n    \"Please Enter the Password for Your MQTT Broker\",\n    ]\n    \nlet autoOutput;\nfor(let pat in cases){\n    if (trigger.includes(cases[pat])){\n        let gatewayConfig = global.get(\"LORIDANE.settings.gatewayConfig\") || {};\n        if (gatewayConfig != {} && gatewayConfig.automatic){\n            let autoOutput = '';\n            node.warn('Gateway Auto Configuration')\n            switch(pat){\n                case \"0\":\n                    autoOutput = gatewayConfig.ssid+'\\n';\n                    break;\n                case \"1\":\n                    autoOutput = gatewayConfig.wpwd+'\\n';\n                    break;\n                case \"2\":\n                    autoOutput = gatewayConfig.broker+'\\n';\n                    break;\n                case \"3\":\n                    autoOutput = gatewayConfig.user+'\\n';\n                    break;\n                case \"4\":\n                    autoOutput = gatewayConfig.mpwd+'\\n';\n                    break;\n                default:\n                    node.warn('no case met')\n                    return;\n            }\n            return [null,{payload:autoOutput}];\n        }\n        return [msg,null];\n    }else{\n        continue;  \n    }\n}\nreturn;",
+        "outputs": 2,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 180,
+        "wires": [
+            [
+                "2025553245eafb29",
+                "0081140cd5374547"
+            ],
+            [
+                "9443f601f2e54a8b"
+            ]
+        ]
+    },
+    {
+        "id": "53bfad030d9cd90a",
+        "type": "ui_toast",
+        "z": "b9c36c50122d3534",
+        "position": "prompt",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "Input Dialog Creds",
+        "x": 610,
+        "y": 160,
+        "wires": [
+            [
+                "9443f601f2e54a8b",
+                "2025553245eafb29"
+            ]
+        ]
+    },
+    {
+        "id": "a1af85d35eb7dacf",
+        "type": "ui_button",
+        "z": "b9c36c50122d3534",
+        "name": "",
+        "group": "4073e498fd9f7db7",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "WiFi Credentials",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "wifi",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 660,
+        "y": 120,
+        "wires": [
+            [
+                "9443f601f2e54a8b"
+            ]
+        ]
+    },
+    {
+        "id": "6525c9359d920c7a",
+        "type": "ui_button",
+        "z": "b9c36c50122d3534",
+        "name": "",
+        "group": "4073e498fd9f7db7",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "MQTT Credentials",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "mqtt",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 670,
+        "y": 80,
+        "wires": [
+            [
+                "9443f601f2e54a8b"
+            ]
+        ]
+    },
+    {
+        "id": "20afc46063fc460e",
+        "type": "debug",
+        "z": "b9c36c50122d3534",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 330,
+        "y": 60,
+        "wires": []
+    },
+    {
+        "id": "2025553245eafb29",
+        "type": "debug",
+        "z": "b9c36c50122d3534",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 790,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "d0db093491b0175f",
+        "type": "function",
+        "z": "b9c36c50122d3534",
+        "name": "Confirmation",
+        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\n\nmsg = {payload: trigger, topic: \"Answer:\"};\nif(trigger.includes(\"Message arrived\"))return;\ncases = [\n    \", IP address:\",\n    \"Please Enter Your WiFi-Password\",\n    \"[WIFI] Connecting to\",\n    \"MQTT Credentials updated\",\n    \"Subscribing to topic:\",\n    \"lora/GW\"\n    ]\n\nfor(var pat of cases){\n    if (trigger.includes(pat)){\n        return msg;\n    }else{\n        continue;  \n    }\n}\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 230,
+        "y": 240,
+        "wires": [
+            [
+                "7909a4c4cc9cbfb7"
+            ]
+        ]
+    },
+    {
+        "id": "7909a4c4cc9cbfb7",
+        "type": "ui_toast",
+        "z": "b9c36c50122d3534",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 270,
+        "y": 300,
+        "wires": []
+    },
+    {
+        "id": "0081140cd5374547",
+        "type": "function",
+        "z": "b9c36c50122d3534",
+        "name": "filter null msg",
+        "func": "if (msg === null){\n    return;\n}\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 475,
+        "y": 160,
+        "wires": [
+            [
+                "53bfad030d9cd90a"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "e604d18b909fb87d",
+        "type": "debug",
+        "z": "b9c36c50122d3534",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 610,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "d726f7d4.e188a8",
+        "type": "serial-port",
+        "serialport": "/dev/ttyUSB0",
+        "serialbaud": "115200",
+        "databits": "8",
+        "parity": "none",
+        "stopbits": "1",
+        "waitfor": "",
+        "dtr": "none",
+        "rts": "none",
+        "cts": "none",
+        "dsr": "none",
+        "newline": "\\n",
+        "bin": "false",
+        "out": "char",
+        "addchar": "",
+        "responsetimeout": "10000"
+    },
+    {
+        "id": "4073e498fd9f7db7",
+        "type": "ui_group",
+        "name": "Change Gateway Settings via USB",
+        "tab": "1809f267.7a279e",
+        "order": 6,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
     },
     {
         "id": "f74e4d3b7750f42f",
@@ -436,522 +447,176 @@
         }
     },
     {
-        "id": "b5aa0f5765475d21",
+        "id": "e5410fa4.8b429",
+        "type": "function",
+        "z": "f74e4d3b7750f42f",
+        "name": "analyse payload",
+        "func": "if(msg.payload[0] == \"+\"){\n    return;\n}\n\nlet pay = [];\nlet payloadobject = {};\n\nif(typeof(msg.payload) != \"number\"){\n    if (msg.payload.includes(\";\")){\n        pay = msg.payload.split(\";\");    \n    }else{\n        pay[0] = msg.payload;\n    }\n}else{\n     pay[0] = msg.payload;\n}\n\n// split payloads to  measure0, measure1,....and so on\nlet i = 0;\nfor(let val of pay){\n    if(num = parseFloat(val), typeof(num) == \"number\"){\n        val = num;\n    }\n    payloadobject[`measure${i}`] = val;\n    i++;\n}\nmsg.payload = payloadobject;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 180,
+        "wires": [
+            [
+                "11d81530.cba6ab"
+            ]
+        ]
+    },
+    {
+        "id": "11d81530.cba6ab",
+        "type": "function",
+        "z": "f74e4d3b7750f42f",
+        "name": "Set DataSet",
+        "func": "let data = msg.data\nconst UID = data.node;\nlet time = new Date(data.lastSeen)||new Date.now();\nlet showtime = time.toLocaleString(\"de-DE\");\nlet date = time.toISOString().substr(0,7);\nconst USER = global.get(\"LORIDANE.LinuxUsername\");\n\nmsg.payload.time = showtime;\nmsg.payload.timestamp = data.lastSeen;\nmsg.payload.uid = UID;\n\nif(msg.payload !== null)msg.filename = `/home/${USER}/LORIDANE/database/${UID}/${UID}_${date}.json`;\nmsg.dir = `/home/${USER}/LORIDANE/database/${UID}`;\nglobal.set(`LORIDANE.data.${UID}.lastreading`,msg.payload);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 690,
+        "y": 180,
+        "wires": [
+            [
+                "40c4880ff2097a1c"
+            ]
+        ]
+    },
+    {
+        "id": "30afd728.c964c8",
+        "type": "file",
+        "z": "f74e4d3b7750f42f",
+        "name": "",
+        "filename": "",
+        "appendNewline": true,
+        "createDir": true,
+        "overwriteFile": "false",
+        "encoding": "none",
+        "x": 870,
+        "y": 120,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "92174b3b.9e10f8",
+        "type": "switch",
+        "z": "f74e4d3b7750f42f",
+        "name": "filter",
+        "property": "data.node",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "neq",
+                "v": "NO94B97EC0C46C",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 310,
+        "y": 200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "114959bf99688411",
+        "type": "debug",
+        "z": "f74e4d3b7750f42f",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 510,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "f87ec9a8d00816bc",
+        "type": "comment",
+        "z": "f74e4d3b7750f42f",
+        "name": "Write input data to files",
+        "info": "",
+        "x": 370,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "2b71bd33fe1bfb21",
+        "type": "comment",
+        "z": "f74e4d3b7750f42f",
+        "name": "connect switch into gap to filter particular nodes",
+        "info": "",
+        "x": 440,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "f17a47f02ba50177",
+        "type": "status",
+        "z": "f74e4d3b7750f42f",
+        "name": "",
+        "scope": [
+            "30afd728.c964c8"
+        ],
+        "x": 690,
+        "y": 300,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "40c4880ff2097a1c",
+        "type": "function",
+        "z": "f74e4d3b7750f42f",
+        "name": "write dataset to File",
+        "func": "const fs = global.get(\"fs\");\nconst dir = msg.dir;\ntry{\n    fs.appendFile(msg.filename, JSON.stringify(msg.payload)+'\\n', err => {\n    if (err) node.warn(err);\n    if (!fs.existsSync(dir)){\n        fs.mkdirSync(dir);\n        fs.appendFileSync(msg.filename,JSON.stringify(msg.payload)+'\\n');\n    }\n    });\n    \n}catch(err) {\n    node.warn(err)\n    fs.writeFileSync(msg.filename, JSON.stringify(msg.payload)+'\\n');\n}\n  //file written successfully\nnode.status({text:msg.filename});\nreturn msg;",
+        "outputs": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 890,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "d7577d7f.0f9b4",
         "type": "subflow",
-        "name": "MQTT Forwarder",
+        "name": "LORIDANE - GUI Messages",
         "info": "",
         "category": "Loridane",
         "in": [
             {
-                "x": 200,
-                "y": 120,
+                "x": 120,
+                "y": 140,
                 "wires": [
                     {
-                        "id": "3126adbea28f66af"
+                        "id": "cfe970e8.dec84"
+                    },
+                    {
+                        "id": "600536c1.7e8cc8"
+                    },
+                    {
+                        "id": "04de0d0b8bcf8885"
                     }
                 ]
             }
         ],
-        "out": [
-            {
-                "x": 840,
-                "y": 120,
-                "wires": [
-                    {
-                        "id": "80c1923731d9fae4",
-                        "port": 0
-                    }
-                ]
-            }
-        ],
+        "out": [],
         "env": [],
         "meta": {},
         "color": "#3FADB5",
-        "icon": "font-awesome/fa-paper-plane"
-    },
-    {
-        "id": "2baadb05.c532f4",
-        "type": "group",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "style": {
-            "fill": "#ffff3f",
-            "fill-opacity": "0.31",
-            "label": true
-        },
-        "nodes": [
-            "c3c07ea9.8a444",
-            "2269f9a3.74bc46",
-            "22e7e77c.e3a278",
-            "8b8be6c.bb37118",
-            "7f63c285.112a6c",
-            "9f216e3.3ebfd9",
-            "f7c8f902.ba6358",
-            "6f40b123.85031",
-            "a1c83a72.deb3d8",
-            "d92e9da8.79e03",
-            "40bc1de0.b21fe4",
-            "42890313.99adec",
-            "1a13b6b1f204b0e5"
-        ],
-        "x": 174,
-        "y": 699,
-        "w": 792,
-        "h": 422
-    },
-    {
-        "id": "4936118b.229c4",
-        "type": "group",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "style": {
-            "label": true,
-            "fill": "#3FADB5",
-            "fill-opacity": "0.26",
-            "stroke": "#3FADB5"
-        },
-        "nodes": [
-            "32bd7baa.d97b84",
-            "f4bb67bd.d39b98",
-            "8d9b21fb.c4275",
-            "91387791.465208",
-            "462cebc3.de6054",
-            "8ed3f24e.7d554",
-            "ae7a5c97.cc6aa",
-            "96e88eff.65928",
-            "84f194f0.98f118",
-            "514c816a.24ad6",
-            "48d31a4b.9b3544",
-            "713d228e.dde67c",
-            "dcee77a5.339a48",
-            "c2a7d48a.8b7dc8",
-            "ba03182a.053b38",
-            "a92d9ccf.7a839",
-            "c6397117.2fd33",
-            "b5c5836bfcd2b2f6",
-            "23ee3a1a1df01ae6",
-            "1405d54f20affd95",
-            "96668ca0cec58e41",
-            "e00e39905c1aa5d6"
-        ],
-        "x": 54,
-        "y": 179,
-        "w": 1272,
-        "h": 382
-    },
-    {
-        "id": "3458ce4.31e1d32",
-        "type": "ui_group",
-        "name": "Messages",
-        "tab": "278b2300.ae23ae",
-        "order": 1,
-        "disp": true,
-        "width": "18",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "1152859e.ef93ba",
-        "type": "ui_group",
-        "z": "922120e5.5b086",
-        "name": "Ignore List",
-        "tab": "1809f267.7a279e",
-        "order": 3,
-        "disp": true,
-        "width": "8",
-        "collapse": false
-    },
-    {
-        "id": "f798079b.0c85e8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 3,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "fe39cdd7.d53ea",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 5,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "905bed34.63eb3",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 6,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "b762c9b2.4a59b8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 7,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "db209ff8.5830f",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 8,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "41a7925c.8a3c6c",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 9,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "a6441479.e064f8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 10,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "5e652f73.af4fe",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 11,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "d7396f84.84707",
-        "type": "ui_group",
-        "name": "Server",
-        "tab": "1809f267.7a279e",
-        "order": 1,
-        "disp": true,
-        "width": "8",
-        "collapse": false
-    },
-    {
-        "id": "a3b84e04.bcada",
-        "type": "ui_group",
-        "name": "Configure Single Node",
-        "tab": "7f451d99.cdaae4",
-        "order": 1,
-        "disp": true,
-        "width": "12",
-        "collapse": false
-    },
-    {
-        "id": "41b7f885.973478",
-        "type": "ui_group",
-        "name": "Configure Gateway",
-        "tab": "6b5685b0.8ca3ec",
-        "order": 1,
-        "disp": true,
-        "width": "12",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "5db15994.d9fc08",
-        "type": "ui_group",
-        "name": "Change Global Network Configuration",
-        "tab": "842e81e.7f33f8",
-        "order": 1,
-        "disp": true,
-        "width": "12",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "753624ea.23803c",
-        "type": "ui_group",
-        "name": "Delete Device",
-        "tab": "1809f267.7a279e",
-        "order": 5,
-        "disp": true,
-        "width": "8",
-        "collapse": false
-    },
-    {
-        "id": "14943851.2ea1c8",
-        "type": "ui_group",
-        "name": "Address Generator",
-        "tab": "1809f267.7a279e",
-        "order": 3,
-        "disp": true,
-        "width": "8",
-        "collapse": false
-    },
-    {
-        "id": "1809f267.7a279e",
-        "type": "ui_tab",
-        "name": "System",
-        "icon": "fa-cog",
-        "order": 5,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "bf837bc6.2c47f8",
-        "type": "ui_group",
-        "d": true,
-        "name": "ONRO",
-        "tab": "278b2300.ae23ae",
-        "order": 3,
-        "disp": true,
-        "width": "8",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "7f451d99.cdaae4",
-        "type": "ui_tab",
-        "name": "Configure Node",
-        "icon": "fa-microchip",
-        "order": 4,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "6b5685b0.8ca3ec",
-        "type": "ui_tab",
-        "name": "Configure Gateway",
-        "icon": "wifi",
-        "order": 3,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "842e81e.7f33f8",
-        "type": "ui_tab",
-        "name": "Global Config",
-        "icon": "fa-globe",
-        "order": 2,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "278b2300.ae23ae",
-        "type": "ui_tab",
-        "name": "Messages",
-        "icon": "comment",
-        "order": 1,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "11c9f05.acda51",
-        "type": "ui_group",
-        "name": "Admit Node",
-        "tab": "3dfe0b0a.ecf364",
-        "order": 1,
-        "disp": true,
-        "width": "8",
-        "collapse": false
-    },
-    {
-        "id": "3dfe0b0a.ecf364",
-        "type": "ui_tab",
-        "name": "Admittance",
-        "icon": "key",
-        "order": 7,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "3be33484.0e776c",
-        "type": "mqtt-broker",
-        "name": "",
-        "broker": "192.168.4.1",
-        "port": "1883",
-        "clientid": "",
-        "usetls": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willPayload": "",
-        "willMsg": {},
-        "sessionExpiry": ""
-    },
-    {
-        "id": "d726f7d4.e188a8",
-        "type": "serial-port",
-        "serialport": "/dev/ttyUSB0",
-        "serialbaud": "115200",
-        "databits": "8",
-        "parity": "none",
-        "stopbits": "1",
-        "waitfor": "",
-        "dtr": "none",
-        "rts": "none",
-        "cts": "none",
-        "dsr": "none",
-        "newline": "\\n",
-        "bin": "false",
-        "out": "char",
-        "addchar": "",
-        "responsetimeout": "10000"
-    },
-    {
-        "id": "4960ed19c09e81e0",
-        "type": "ui_base",
-        "theme": {
-            "name": "theme-light",
-            "lightTheme": {
-                "default": "#0094CE",
-                "baseColor": "#06abb7",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": true,
-                "reset": false
-            },
-            "darkTheme": {
-                "default": "#097479",
-                "baseColor": "#097479",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": false
-            },
-            "customTheme": {
-                "name": "Untitled Theme 1",
-                "default": "#4B7930",
-                "baseColor": "#4B7930",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
-            },
-            "themeState": {
-                "base-color": {
-                    "default": "#0094CE",
-                    "value": "#06abb7",
-                    "edited": true
-                },
-                "page-titlebar-backgroundColor": {
-                    "value": "#06abb7",
-                    "edited": false
-                },
-                "page-backgroundColor": {
-                    "value": "#fafafa",
-                    "edited": false
-                },
-                "page-sidebar-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-textColor": {
-                    "value": "#12e8f7",
-                    "edited": false
-                },
-                "group-borderColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "widget-textColor": {
-                    "value": "#111111",
-                    "edited": false
-                },
-                "widget-backgroundColor": {
-                    "value": "#06abb7",
-                    "edited": false
-                },
-                "widget-borderColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "base-font": {
-                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
-                }
-            },
-            "angularTheme": {
-                "primary": "indigo",
-                "accents": "blue",
-                "warn": "red",
-                "background": "grey",
-                "palette": "light"
-            }
-        },
-        "site": {
-            "name": "Loridane GUI",
-            "hideToolbar": "false",
-            "allowSwipe": "false",
-            "lockMenu": "false",
-            "allowTempTheme": "true",
-            "dateFormat": "DD.MM.YYYY",
-            "sizes": {
-                "sx": 48,
-                "sy": 48,
-                "gx": 6,
-                "gy": 6,
-                "cx": 6,
-                "cy": 6,
-                "px": 0,
-                "py": 0
-            }
-        }
-    },
-    {
-        "id": "4073e498fd9f7db7",
-        "type": "ui_group",
-        "name": "Change Gateway Settings via USB",
-        "tab": "1809f267.7a279e",
-        "order": 6,
-        "disp": true,
-        "width": "8",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "4640ddc61a547a32",
-        "type": "ui_group",
-        "name": "Last Reading",
-        "tab": "278b2300.ae23ae",
-        "order": 2,
-        "disp": true,
-        "width": "8",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "06efc03a6ebef2e8",
-        "type": "ui_group",
-        "name": "Export Files",
-        "tab": "1809f267.7a279e",
-        "order": 8,
-        "disp": true,
-        "width": "8",
-        "collapse": false,
-        "className": ""
+        "icon": "node-red/envelope.svg"
     },
     {
         "id": "cfe970e8.dec84",
@@ -1121,6 +786,307 @@
         "wires": []
     },
     {
+        "id": "82015455d437d826",
+        "type": "ui_table",
+        "z": "d7577d7f.0f9b4",
+        "group": "3458ce4.31e1d32",
+        "name": "Incoming Data",
+        "order": 9,
+        "width": "18",
+        "height": "8",
+        "columns": [],
+        "outputs": 0,
+        "cts": false,
+        "x": 840,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "aca2a067f7c14a0a",
+        "type": "function",
+        "z": "d7577d7f.0f9b4",
+        "name": "read directory",
+        "func": "const databasePath = global.get(\"LORIDANE.settings.path.database\");\nconst fs = global.get(\"fs\");\nlet files = [];\nlet pathes = [];\n\n//--------------------------\nfunction traverseDir(dir) {\n    if(dir[dir.length-1]!= \"/\") dir = dir+\"/\";\n        fs.readdirSync(dir).forEach(file => {\n        let fullPath = dir+file;\n        \n        if (fs.lstatSync(fullPath).isDirectory()) {\n            traverseDir(fullPath);\n        } else {\n            files.push(file.replace(\".json\",\"\"));\n            pathes.push(fullPath)\n        }  \n   });\n   return pathes;\n}\n//--------------------------\n\n\ntraverseDir(databasePath);\njsons = [];\n\nfor (let file of pathes){\n    if(file.endsWith(\".json\")){\n        jsons.push(file);\n    }\n}\n\nmsg.filePaths = jsons;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 340,
+        "y": 460,
+        "wires": [
+            [
+                "7ac36e992ff6e17a"
+            ]
+        ]
+    },
+    {
+        "id": "c8031ef90f17bdf7",
+        "type": "debug",
+        "z": "d7577d7f.0f9b4",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 590,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "7ac36e992ff6e17a",
+        "type": "function",
+        "z": "d7577d7f.0f9b4",
+        "name": "get tail of every file",
+        "func": "let tailLen;\nif(msg.topic == \"tailLen\"){\n    context.set(\"tailLen\", msg.payload);\n    return;\n}else{\n    tailLen = context.get(\"tailLen\")||\"5\";\n}\n\nfor(let path of msg.filePaths){\n    node.send({path:`tail -${tailLen} ${path}`, topic: false})\n    //node.warn(path)\n}\n\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 420,
+        "y": 520,
+        "wires": [
+            [
+                "1a0460b0be60f5db"
+            ]
+        ]
+    },
+    {
+        "id": "380320e9e2346798",
+        "type": "exec",
+        "z": "d7577d7f.0f9b4",
+        "command": "",
+        "addpay": "path",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "tail file ends from database",
+        "x": 540,
+        "y": 580,
+        "wires": [
+            [
+                "f3d923e18e539d3a"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "f9da180cb6c4e409",
+        "type": "function",
+        "z": "d7577d7f.0f9b4",
+        "name": "parse json and write file to object",
+        "func": "dataArr = context.get(\"dataArr\") || [];\n\nif(msg.path !== undefined){\n    lastDevice = msg.path.split(\"/\")\n    lastDevice = lastDevice[lastDevice.length -2]\n    context.set(\"lastDevice\",lastDevice);\n}else{\n    lastDevice = context.get(\"lastDevice\")\n}\n\nif (msg.payload !== \"\" && msg.payload !== undefined){\n    lastLines = msg.payload.split(\"\\n\")\n    lastLines.splice(lastLines.length-1,1);\n    for (let line of lastLines){\n        obj = {Device:lastDevice, ...JSON.parse(line)}\n        dataArr.push(obj);\n    }\n    context.set(\"dataArr\",dataArr);\n}\n\nif(msg.topic === true){\n    context.set(\"dataArr\",[]);\n    node.send({payload:[]});\n    dataArr.sort( function(a,b){return b.timestamp - a.timestamp} );\n    return {payload: dataArr};\n}\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 920,
+        "y": 560,
+        "wires": [
+            [
+                "82015455d437d826"
+            ]
+        ]
+    },
+    {
+        "id": "04de0d0b8bcf8885",
+        "type": "function",
+        "z": "d7577d7f.0f9b4",
+        "name": "filter msgs < 30 seconds",
+        "func": "const now = Date.now()\nconst lasttime = context.get(\"lasttime\") || now;\nlet interval = now - lasttime;\nlet timer = context.get(\"timer\");\nclearTimeout(timer);\ncontext.set(\"timer\",timer);\nsetTimeout(()=>node.status({}),5000);\n\nif(interval <= 30000){\n    timer = setTimeout(()=>{\n        node.send({payload:now});\n        node.status({text:\"Table Updated\"})\n        },\n        30000)\n    context.set(\"timer\",timer);\n    node.status({text:\"Msg Filtered\"})\n    return;\n}\n\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 175,
+        "y": 460,
+        "wires": [
+            [
+                "aca2a067f7c14a0a"
+            ]
+        ],
+        "icon": "node-red-contrib-throttle/throttle.png",
+        "l": false
+    },
+    {
+        "id": "3474282182622796",
+        "type": "ui_button",
+        "z": "d7577d7f.0f9b4",
+        "name": "",
+        "group": "3458ce4.31e1d32",
+        "order": 8,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "UPDATE TABLE",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 340,
+        "y": 420,
+        "wires": [
+            [
+                "aca2a067f7c14a0a"
+            ]
+        ]
+    },
+    {
+        "id": "453ef5400f2519f0",
+        "type": "ui_dropdown",
+        "z": "d7577d7f.0f9b4",
+        "name": "how many historic values",
+        "label": "Amount of historic values",
+        "tooltip": "",
+        "place": "How many per device?",
+        "group": "3458ce4.31e1d32",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "",
+                "value": "5",
+                "type": "str"
+            },
+            {
+                "label": "",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "",
+                "value": "2",
+                "type": "str"
+            },
+            {
+                "label": "",
+                "value": "10",
+                "type": "str"
+            },
+            {
+                "label": "",
+                "value": "20",
+                "type": "str"
+            }
+        ],
+        "payload": "",
+        "topic": "tailLen",
+        "topicType": "str",
+        "className": "",
+        "x": 170,
+        "y": 520,
+        "wires": [
+            [
+                "7ac36e992ff6e17a"
+            ]
+        ]
+    },
+    {
+        "id": "1a0460b0be60f5db",
+        "type": "switch",
+        "z": "d7577d7f.0f9b4",
+        "name": "",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "true"
+            },
+            {
+                "t": "else"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 555,
+        "y": 520,
+        "wires": [
+            [
+                "f9da180cb6c4e409",
+                "c8031ef90f17bdf7"
+            ],
+            [
+                "380320e9e2346798"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "f3d923e18e539d3a",
+        "type": "function",
+        "z": "d7577d7f.0f9b4",
+        "name": "wait until timeout",
+        "func": "let timer = context.get(\"timer\")||null;\nclearTimeout(timer);\n\ncontext.set(\"timer\",setTimeout(() => node.send({topic:true}),200));\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 715,
+        "y": 580,
+        "wires": [
+            [
+                "f9da180cb6c4e409"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "3458ce4.31e1d32",
+        "type": "ui_group",
+        "name": "Messages",
+        "tab": "278b2300.ae23ae",
+        "order": 1,
+        "disp": true,
+        "width": "18",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "c23de0ef.dae5f",
+        "type": "subflow",
+        "name": "LORIDANE - NodeSync",
+        "info": "",
+        "category": "Loridane",
+        "in": [],
+        "out": [],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "font-awesome/fa-clock-o",
+        "status": {
+            "x": 500,
+            "y": 220,
+            "wires": [
+                {
+                    "id": "111ba65b.68a45a",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "47d49580.9cf8dc",
         "type": "function",
         "z": "c23de0ef.dae5f",
@@ -1184,6 +1150,71 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "b62026e6367c3ae2",
+        "type": "function",
+        "z": "c23de0ef.dae5f",
+        "name": "set sync interval",
+        "func": "const interval = global.get(\"LORIDANE.settings.syncInterval\")||233;\n\nfunction trigger(){\n    node.send({payload:true});\n}\n\nlet intVal = context.get(\"intVal\");\nclearInterval(intVal);\n\nintVal = setInterval(trigger,interval * 1000);\ncontext.set(\"intVal\",intVal);\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 380,
+        "y": 80,
+        "wires": [
+            [
+                "47d49580.9cf8dc"
+            ]
+        ]
+    },
+    {
+        "id": "922120e5.5b086",
+        "type": "subflow",
+        "name": "LORIDANE - GUI",
+        "info": "",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 40,
+                "y": 460,
+                "wires": [
+                    {
+                        "id": "fa0f21a7.2fba9"
+                    },
+                    {
+                        "id": "f2230676.6a28f8"
+                    },
+                    {
+                        "id": "60d33b08.42a134"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 1440,
+                "y": 460,
+                "wires": [
+                    {
+                        "id": "53654a49.b88fe4",
+                        "port": 0
+                    },
+                    {
+                        "id": "1733b022.f7d1a",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "node-red-dashboard/ui_button.png"
     },
     {
         "id": "34e37a28.b9b3f6",
@@ -3208,6 +3239,625 @@
         "wires": []
     },
     {
+        "id": "135e5aaf42390a7a",
+        "type": "function",
+        "z": "922120e5.5b086",
+        "name": "Load Devices",
+        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nlet gws = global.get(\"LORIDANE.devices.gw\");\nlet options = [];\n\n// as list for the choose device dropdown load the device an if available the friendlyname\nfor (var node in nodes){\n    let name = \"\";\n    if(nodes[node].friendlyname != \"\" && nodes[node].friendlyname != undefined){\n        name = `${nodes[node].uid} - ${nodes[node].friendlyname}`;\n        options[node] = {[name]:nodes[node].uid};\n    }else{\n        name = `${nodes[node].uid}`;\n        options[node] = {[name]:nodes[node].uid} ;\n    }\n}\n\nreturn {options:options};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 360,
+        "y": 2140,
+        "wires": [
+            [
+                "72fde4c855eb24ff"
+            ]
+        ]
+    },
+    {
+        "id": "72fde4c855eb24ff",
+        "type": "ui_dropdown",
+        "z": "922120e5.5b086",
+        "name": "Choose Node",
+        "label": "",
+        "tooltip": "",
+        "place": "Select Device to show last reading",
+        "group": "4640ddc61a547a32",
+        "order": 2,
+        "width": 7,
+        "height": 1,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "nodes",
+        "topicType": "str",
+        "className": "",
+        "x": 540,
+        "y": 2140,
+        "wires": [
+            [
+                "bb83ef6a5cd436a5"
+            ]
+        ]
+    },
+    {
+        "id": "ff637a5bb7fe4c05",
+        "type": "ui_button",
+        "z": "922120e5.5b086",
+        "name": "reload nodes",
+        "group": "4640ddc61a547a32",
+        "order": 1,
+        "width": 1,
+        "height": 1,
+        "passthru": false,
+        "label": "",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "sync",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 190,
+        "y": 2140,
+        "wires": [
+            [
+                "135e5aaf42390a7a"
+            ]
+        ]
+    },
+    {
+        "id": "169c9c4cc7c474e9",
+        "type": "comment",
+        "z": "922120e5.5b086",
+        "name": "show last readings on dashboard",
+        "info": "",
+        "x": 250,
+        "y": 2100,
+        "wires": []
+    },
+    {
+        "id": "bb83ef6a5cd436a5",
+        "type": "function",
+        "z": "922120e5.5b086",
+        "name": "show data",
+        "func": "device = msg.payload;\nlastreading = global.get(`LORIDANE.data.${device}.lastreading`);\nmsg.topic = `Last received Value by ${device}:`;\nmsg.payload = JSON.stringify(lastreading,null,2);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 730,
+        "y": 2140,
+        "wires": [
+            [
+                "5443800796eb539c"
+            ]
+        ]
+    },
+    {
+        "id": "5443800796eb539c",
+        "type": "ui_toast",
+        "z": "922120e5.5b086",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 930,
+        "y": 2140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8a33cd54dd60903a",
+        "type": "comment",
+        "z": "922120e5.5b086",
+        "name": "Conf Nodes",
+        "info": "",
+        "x": 440,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "9f4e050b99467b7a",
+        "type": "comment",
+        "z": "922120e5.5b086",
+        "name": "Conf Gateway",
+        "info": "",
+        "x": 490,
+        "y": 1180,
+        "wires": []
+    },
+    {
+        "id": "4de74e1b8bf6ca3d",
+        "type": "comment",
+        "z": "922120e5.5b086",
+        "name": "Conf Global",
+        "info": "",
+        "x": 570,
+        "y": 1580,
+        "wires": []
+    },
+    {
+        "id": "09401e9c92cd3373",
+        "type": "ui_button",
+        "z": "922120e5.5b086",
+        "name": "",
+        "group": "d7396f84.84707",
+        "order": 0,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "restart loridane",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "Are You Sure You Want Loridane to restart?",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1320,
+        "y": 160,
+        "wires": [
+            [
+                "3154fa6e600c0b82"
+            ]
+        ]
+    },
+    {
+        "id": "3154fa6e600c0b82",
+        "type": "ui_toast",
+        "z": "922120e5.5b086",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 1510,
+        "y": 160,
+        "wires": [
+            [
+                "8774253d35564225"
+            ]
+        ]
+    },
+    {
+        "id": "8774253d35564225",
+        "type": "switch",
+        "z": "922120e5.5b086",
+        "name": "",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "OK",
+                "vt": "str"
+            },
+            {
+                "t": "neq",
+                "v": "OK",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 1680,
+        "y": 160,
+        "wires": [
+            [
+                "7f5864c8ac1fc3f8",
+                "9a41840a9d647987"
+            ],
+            [
+                "315de8a6055d3a4c"
+            ]
+        ]
+    },
+    {
+        "id": "315de8a6055d3a4c",
+        "type": "ui_toast",
+        "z": "922120e5.5b086",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "topic": "",
+        "name": "Cancelled",
+        "x": 1880,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "2408fcb4bd699283",
+        "type": "exec",
+        "z": "922120e5.5b086",
+        "command": "node-red-restart",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 2000,
+        "y": 120,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "197e647230936896",
+        "type": "inject",
+        "z": "922120e5.5b086",
+        "name": "Shutdown",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1330,
+        "y": 120,
+        "wires": [
+            [
+                "2408fcb4bd699283"
+            ]
+        ]
+    },
+    {
+        "id": "7f5864c8ac1fc3f8",
+        "type": "function",
+        "z": "922120e5.5b086",
+        "name": "write config",
+        "func": "writeConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nwriteConfig(0 /**delay in ms*/);\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 2160,
+        "y": 180,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9a41840a9d647987",
+        "type": "delay",
+        "z": "922120e5.5b086",
+        "name": "",
+        "pauseType": "delay",
+        "timeout": "2",
+        "timeoutUnits": "seconds",
+        "rate": "1",
+        "nbRateUnits": "1",
+        "rateUnits": "second",
+        "randomFirst": "1",
+        "randomLast": "5",
+        "randomUnits": "seconds",
+        "drop": false,
+        "x": 1835,
+        "y": 140,
+        "wires": [
+            [
+                "2408fcb4bd699283"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "5731a85d08ea3dd5",
+        "type": "function",
+        "z": "922120e5.5b086",
+        "name": "clear Ignore an admission list",
+        "func": "list = [];\nglobal.set(\"LORIDANE.ignorelist\",list);\nglobal.set(\"LORIDANE.admit\",list);\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 500,
+        "y": 640,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "12abec650d9f6642",
+        "type": "ui_button",
+        "z": "922120e5.5b086",
+        "name": "",
+        "group": "1152859e.ef93ba",
+        "order": 1,
+        "width": "8",
+        "height": 1,
+        "passthru": false,
+        "label": "clear ignorelist",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 260,
+        "y": 640,
+        "wires": [
+            [
+                "5731a85d08ea3dd5"
+            ]
+        ]
+    },
+    {
+        "id": "1152859e.ef93ba",
+        "type": "ui_group",
+        "z": "922120e5.5b086",
+        "name": "Ignore List",
+        "tab": "1809f267.7a279e",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "f798079b.0c85e8",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 3,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "fe39cdd7.d53ea",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 5,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "905bed34.63eb3",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 6,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "b762c9b2.4a59b8",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 7,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "db209ff8.5830f",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 8,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "41a7925c.8a3c6c",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 9,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "a6441479.e064f8",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 10,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "5e652f73.af4fe",
+        "type": "ui_spacer",
+        "z": "922120e5.5b086",
+        "name": "spacer",
+        "group": "bf837bc6.2c47f8",
+        "order": 11,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "d7396f84.84707",
+        "type": "ui_group",
+        "name": "Server",
+        "tab": "1809f267.7a279e",
+        "order": 1,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "a3b84e04.bcada",
+        "type": "ui_group",
+        "name": "Configure Single Node",
+        "tab": "7f451d99.cdaae4",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false
+    },
+    {
+        "id": "41b7f885.973478",
+        "type": "ui_group",
+        "name": "Configure Gateway",
+        "tab": "6b5685b0.8ca3ec",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "5db15994.d9fc08",
+        "type": "ui_group",
+        "name": "Change Global Network Configuration",
+        "tab": "842e81e.7f33f8",
+        "order": 1,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "753624ea.23803c",
+        "type": "ui_group",
+        "name": "Delete Device",
+        "tab": "1809f267.7a279e",
+        "order": 5,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "14943851.2ea1c8",
+        "type": "ui_group",
+        "name": "Address Generator",
+        "tab": "1809f267.7a279e",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "1809f267.7a279e",
+        "type": "ui_tab",
+        "name": "System",
+        "icon": "fa-cog",
+        "order": 5,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "bf837bc6.2c47f8",
+        "type": "ui_group",
+        "d": true,
+        "name": "ONRO",
+        "tab": "278b2300.ae23ae",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "7f451d99.cdaae4",
+        "type": "ui_tab",
+        "name": "Configure Node",
+        "icon": "fa-microchip",
+        "order": 4,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "6b5685b0.8ca3ec",
+        "type": "ui_tab",
+        "name": "Configure Gateway",
+        "icon": "wifi",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "842e81e.7f33f8",
+        "type": "ui_tab",
+        "name": "Global Config",
+        "icon": "fa-globe",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "1395c386.064e8c",
+        "type": "subflow",
+        "name": "LORIDANE - Init",
+        "info": "",
+        "category": "Loridane",
+        "in": [],
+        "out": [],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "node-red/cog.svg",
+        "status": {
+            "x": 660,
+            "y": 180,
+            "wires": [
+                {
+                    "id": "dd36f402.134978",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "dd36f402.134978",
         "type": "status",
         "z": "1395c386.064e8c",
@@ -3392,6 +4042,217 @@
         ]
     },
     {
+        "id": "74934f3780837a8f",
+        "type": "exec",
+        "z": "1395c386.064e8c",
+        "command": "pwd",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 390,
+        "y": 80,
+        "wires": [
+            [
+                "c868a2a20ad0f13a"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "c868a2a20ad0f13a",
+        "type": "function",
+        "z": "1395c386.064e8c",
+        "name": "Extract Username",
+        "func": "data = msg.payload;\n\ndata = data.split('/');\nlet user = data[data.length-1].replace('\\n','');\nglobal.set([\"LORIDANE.LinuxUsername\",\"LORIDANE.blockONstart\"],[user,true]);\nnode.status({text:\"Linux Username: \"+user});\nmsg.user = user;\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 610,
+        "y": 80,
+        "wires": [
+            [
+                "a0be56ff.ac9d48"
+            ]
+        ]
+    },
+    {
+        "id": "debfef189baa4009",
+        "type": "inject",
+        "z": "1395c386.064e8c",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "15",
+        "topic": "",
+        "payloadType": "date",
+        "x": 250,
+        "y": 400,
+        "wires": [
+            [
+                "e179ea2166d2107f"
+            ]
+        ]
+    },
+    {
+        "id": "2c702d141039671f",
+        "type": "exec",
+        "z": "1395c386.064e8c",
+        "command": "sudo systemctl start mosquitto",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 990,
+        "y": 400,
+        "wires": [
+            [],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "e179ea2166d2107f",
+        "type": "exec",
+        "z": "1395c386.064e8c",
+        "command": "pidof mosquitto",
+        "addpay": "",
+        "append": "",
+        "useSpawn": "false",
+        "timer": "",
+        "winHide": false,
+        "oldrc": false,
+        "name": "",
+        "x": 440,
+        "y": 400,
+        "wires": [
+            [
+                "58b96b7be58245f6",
+                "83738104877ee419"
+            ],
+            [],
+            []
+        ]
+    },
+    {
+        "id": "58b96b7be58245f6",
+        "type": "function",
+        "z": "1395c386.064e8c",
+        "name": "return if payload undefined",
+        "func": "if(!msg.payload){\n    return msg;\n}\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 680,
+        "y": 380,
+        "wires": [
+            [
+                "83738104877ee419",
+                "2c702d141039671f"
+            ]
+        ]
+    },
+    {
+        "id": "83738104877ee419",
+        "type": "debug",
+        "z": "1395c386.064e8c",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 630,
+        "y": 480,
+        "wires": []
+    },
+    {
+        "id": "c293f39ddc15f47b",
+        "type": "function",
+        "z": "1395c386.064e8c",
+        "name": "reset device data scope",
+        "func": "let lastdata = global.get(\"LORIDANE.data\");\nconst findNode = global.get(\"LORIDANE.funcs.findNode\");\nlet datakeys = Object.keys(lastdata);\nlet newdata = {};\n\nfor (let key of datakeys) {\n    if(findNode(key) > -1){\n        newdata[key] = lastdata[key];\n    }\n}\nglobal.set(\"LORIDANE.data\", newdata);\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1150,
+        "y": 260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "ada10296.06249",
+        "type": "subflow",
+        "name": "LORIDANE - Send Timedisk",
+        "info": "",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 100,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "e4d7b82.7ce1f48"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 820,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "6dc379ee.b0e338",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "node-red-dashboard/ui_gauge.png",
+        "status": {
+            "x": 580,
+            "y": 180,
+            "wires": [
+                {
+                    "id": "3490e79c.716c88",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "e4d7b82.7ce1f48",
         "type": "function",
         "z": "ada10296.06249",
@@ -3434,7 +4295,7 @@
         "type": "function",
         "z": "ada10296.06249",
         "name": "send new Timedisk",
-        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nconst gws = global.get(\"LORIDANE.devices.gw\");\nnodes = nodes.concat(gws); \nlastnodes = context.get(\"lastnodes\")||[];\ncontext.set(\"lastnodes\",nodes);\ntdsize = msg.payload.size;\nlet newtd = false;\nsubito = (msg.topic == \"subito\");\n//node.warn(subito) //debugging\nlet disk = {}; //global.get(\"LORIDANE.timedisk.disk\")||{};\n\nlet additionalDelay;\n(tdsize -10 < 1e5) ? additionalDelay = 50: additionalDelay = tdsize -10;\n\nsetTimeout(()=>node.status({}),5000);\n\nfunction senddelayed(obj){\n    node.send(obj);\n}\n\nif(lastnodes.length === 0){\n    for(i=0 , all = nodes.length; i < all ; i++){\n        if(nodes[i].uid != lastnodes[i].uid){\n            newtd = true;\n            break;\n        }\n    }\n}\n\nfind = global.get(\"LORIDANE.funcs.findNode\");\ngetconf = global.get(\"LORIDANE.funcs.getConfig\");\n\ncount = 0;\nnewtd = true;\nif (newtd && !subito){\n    time = 0;\n    sentUID = {};\n    for (var gw in gws){\n        for (i=0;i<nodes.length;i++){\n            obj = {payload:`${nodes[i].uid}td:${count};${tdsize};`,topic:`lora/${gws[gw].uid}`};\n            if(sentUID[`${nodes[i].uid}`] === undefined){\n                setTimeout(senddelayed,time,obj);\n                time += additionalDelay;\n                disk[nodes[i].uid] = {uid:nodes[i].uid,slot:count,tdsize:tdsize};\n                sentUID[`${nodes[i].uid}`] = {};\n                sentUID[`${nodes[i].uid.count}`] = count;\n                count++;\n            }\n        }\n        obj = {payload:`cn:sync`,topic:`lora/${gws[gw].uid}`};\n        setTimeout(senddelayed,time,obj);\n    }\n    node.status({text: \"Sent new Timedisk\"});\n}\nglobal.set(\"LORIDANE.timedisk.disk\",disk);\n\nif(subito){\n    devs = global.get(\"LORIDANE.classA\");\n    getconf = global.get(\"LORIDANE.funcs.getConfig\");\n    for (var dev of devs){\n        if(disk[dev] !== undefined){\n            //node.warn(disk)\n            obj = {payload:`${dev}td:${disk[dev].slot};${disk[dev].tdsize};`,topic:`lora/${getconf(dev).nextGW}`};\n            senddelayed(obj);\n        }\n    }\n}\n\nreturn;",
+        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nconst gws = global.get(\"LORIDANE.devices.gw\");\nnodes = nodes.concat(gws); \nlastnodes = context.get(\"lastnodes\")||[];\ncontext.set(\"lastnodes\",nodes);\ntdsize = msg.payload.size;\nlet newtd = false;\nsubito = (msg.topic == \"subito\");\n//node.warn(subito) //debugging\nlet disk = {}; //global.get(\"LORIDANE.timedisk.disk\")||{};\nlet time;\nlet additionalDelay;\n(tdsize -10 < 1e5) ? additionalDelay = 50: additionalDelay = tdsize -10;\n\nsetTimeout(()=>node.status({}),5000);\n\nfunction senddelayed(obj){\n    node.send(obj);\n}\n\nif(lastnodes.length === 0){\n    for(i=0 , all = nodes.length; i < all ; i++){\n        if(nodes[i].uid != lastnodes[i].uid){\n            newtd = true;\n            break;\n        }\n    }\n}\n\nfind = global.get(\"LORIDANE.funcs.findNode\");\ngetconf = global.get(\"LORIDANE.funcs.getConfig\");\n\ncount = 0;\nnewtd = true;\nif (newtd && !subito){\n    time = 50;\n    sentUID = {};\n    for (var gw in gws){\n        obj = {payload:`cn:BL:1`,topic:`lora/${gws[gw].uid}`};\n        setTimeout(senddelayed,time,obj);\n        time += additionalDelay;\n        for (i=0;i<nodes.length;i++){\n            obj = {payload:`${nodes[i].uid}td:${count};${tdsize};`,topic:`lora/${gws[gw].uid}`};\n            if(sentUID[`${nodes[i].uid}`] === undefined){\n                setTimeout(senddelayed,time,obj);\n                time += additionalDelay;\n                disk[nodes[i].uid] = {uid:nodes[i].uid,slot:count,tdsize:tdsize};\n                sentUID[`${nodes[i].uid}`] = {};\n                sentUID[`${nodes[i].uid.count}`] = count;\n                count++;\n            }\n        }\n        obj = {payload:`cn:sync`,topic:`lora/${gws[gw].uid}`};\n        //setTimeout(senddelayed,time,obj);\n    }\n    node.status({text: \"Sent new Timedisk\"});\n}\nglobal.set(\"LORIDANE.timedisk.disk\",disk);\n\nfor (let gw in gws){\n    time += additionalDelay; \n    obj = {payload:`cn:BL:0`,topic:`lora/${gws[gw].uid}`};\n    setTimeout(senddelayed,time,obj);\n    \n}\n\n\nif(subito){\n    devs = global.get(\"LORIDANE.classA\");\n    getconf = global.get(\"LORIDANE.funcs.getConfig\");\n    for (var dev of devs){\n        if(disk[dev] !== undefined){\n            //node.warn(disk)\n            obj = {payload:`${dev}td:${disk[dev].slot};${disk[dev].tdsize};`,topic:`lora/${getconf(dev).nextGW}`};\n            senddelayed(obj);\n        }\n    }\n}\n\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3444,7 +4305,8 @@
         "y": 120,
         "wires": [
             []
-        ]
+        ],
+        "info": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nconst gws = global.get(\"LORIDANE.devices.gw\");\nnodes = nodes.concat(gws); \nlastnodes = context.get(\"lastnodes\")||[];\ncontext.set(\"lastnodes\",nodes);\ntdsize = msg.payload.size;\nlet newtd = false;\nsubito = (msg.topic == \"subito\");\n//node.warn(subito) //debugging\nlet disk = {}; //global.get(\"LORIDANE.timedisk.disk\")||{};\n\nlet additionalDelay;\n(tdsize -10 < 1e5) ? additionalDelay = 50: additionalDelay = tdsize -10;\n\nsetTimeout(()=>node.status({}),5000);\n\nfunction senddelayed(obj){\n    node.send(obj);\n}\n\nif(lastnodes.length === 0){\n    for(i=0 , all = nodes.length; i < all ; i++){\n        if(nodes[i].uid != lastnodes[i].uid){\n            newtd = true;\n            break;\n        }\n    }\n}\n\nfind = global.get(\"LORIDANE.funcs.findNode\");\ngetconf = global.get(\"LORIDANE.funcs.getConfig\");\n\ncount = 0;\nnewtd = true;\nif (newtd && !subito){\n    time = 50;\n    sentUID = {};\n    for (var gw in gws){\n        for (i=0;i<nodes.length;i++){\n            obj = {payload:`${nodes[i].uid}td:${count};${tdsize};`,topic:`lora/${gws[gw].uid}`};\n            if(sentUID[`${nodes[i].uid}`] === undefined){\n                setTimeout(senddelayed,time,obj);\n                time += additionalDelay;\n                disk[nodes[i].uid] = {uid:nodes[i].uid,slot:count,tdsize:tdsize};\n                sentUID[`${nodes[i].uid}`] = {};\n                sentUID[`${nodes[i].uid.count}`] = count;\n                count++;\n            }\n        }\n        obj = {payload:`cn:sync`,topic:`lora/${gws[gw].uid}`};\n        setTimeout(senddelayed,time,obj);\n    }\n    node.status({text: \"Sent new Timedisk\"});\n}\nglobal.set(\"LORIDANE.timedisk.disk\",disk);\n\nif(subito){\n    devs = global.get(\"LORIDANE.classA\");\n    getconf = global.get(\"LORIDANE.funcs.getConfig\");\n    for (var dev of devs){\n        if(disk[dev] !== undefined){\n            //node.warn(disk)\n            obj = {payload:`${dev}td:${disk[dev].slot};${disk[dev].tdsize};`,topic:`lora/${getconf(dev).nextGW}`};\n            senddelayed(obj);\n        }\n    }\n}\n\nreturn;"
     },
     {
         "id": "3490e79c.716c88",
@@ -3488,6 +4350,52 @@
         ]
     },
     {
+        "id": "6712fbef.2d8494",
+        "type": "subflow",
+        "name": "LORIDANE - Acknowledge",
+        "info": "",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 240,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "1a746dcd.d51fd2"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 480,
+                "y": 80,
+                "wires": [
+                    {
+                        "id": "1a746dcd.d51fd2",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "font-awesome/fa-cloud-download",
+        "status": {
+            "x": 520,
+            "y": 160,
+            "wires": [
+                {
+                    "id": "1d0625f6.98bf6a",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "1a746dcd.d51fd2",
         "type": "function",
         "z": "6712fbef.2d8494",
@@ -3517,6 +4425,95 @@
         ]
     },
     {
+        "id": "4e984df.de567b4",
+        "type": "subflow",
+        "name": "LORIDANE - MQTT In",
+        "info": "",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 20,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "088ce0e8085dd6d5"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 520,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "1c0ac556.46e25b",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 920,
+                "y": 120,
+                "wires": [
+                    {
+                        "id": "f023d975.deb8d8",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 1400,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "af3bda90.002258",
+                        "port": 0
+                    },
+                    {
+                        "id": "b3b76bf0.aef8c8",
+                        "port": 0
+                    }
+                ]
+            },
+            {
+                "x": 360,
+                "y": 60,
+                "wires": [
+                    {
+                        "id": "6a479509.a7889c",
+                        "port": 0
+                    },
+                    {
+                        "id": "088ce0e8085dd6d5",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "outputLabels": [
+            "raw data output",
+            "processed Payload",
+            "conditional output, acknowledgement and Class A Devices "
+        ],
+        "icon": "node-red/bridge.svg",
+        "status": {
+            "x": 640,
+            "y": 40,
+            "wires": [
+                {
+                    "id": "f7a51ace.7907f8",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "5766fe05.480f8",
         "type": "mqtt in",
         "z": "4e984df.de567b4",
@@ -3541,7 +4538,7 @@
         "type": "function",
         "z": "4e984df.de567b4",
         "name": "Process incoming Data",
-        "func": "raw = msg.payload;\nif(raw === \"pong\")return;\nlet lastmsgs = context.get(\"lastmsgs\")||[];\nconst now  = Date.now();\nconst decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n\n//node.warn(raw)\nfunction extractID(pay){\n    let len = 14;\n    this.node = pay.slice(0,len);\n    this.pay = pay.slice(len,pay.length);\n    return this;\n}\n\nfunction extractDecipher(raw){\n    let message = raw.split('');\n    const payIndex = raw.indexOf('payload') +10;\n    const endIndex = raw.indexOf('gw') -3;\n    let cipherpay = message.splice(payIndex, endIndex - payIndex);\n    const decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n    let clearpay = decrypt(cipherpay.join(''));\n    //node.warn(clearpay)\n    clearpay = clearpay.split('');\n    message.splice(payIndex, 0, clearpay);\n    //node.warn(message.join(''))\n    return message.join('');\n}\n\n\nlet input;\n//*/Variant 1 raw json\nif(raw.startsWith(\"{\")){\n    //*/Variant 1 object\n    if(raw.includes('\"payload\":\"NO')){\n        try{\n            input = JSON.parse(raw);\n        }catch(e){\n            node.warn('There is something wrong with the JSON (Line 38)')\n        }\n    }else{\n        testcipher: if (msg.cipher){\n            let plain = decrypt(msg.cipher);\n            input = raw.substr(0,msg.startindex)+plain+raw.substr(msg.startindex+1);\n        }else{\n            break testcipher;\n        }\n        //node.warn(message)\n        try{\n            input = JSON.parse(input);\n        }catch(e){\n            node.warn(`There is something wrong with the JSON (Line 51) ERR: ${e}`)\n        }\n    }\n    nodedata = input.payload;\n    gateway = input.gw;\n    RSSI = input.rssi;\n    SNR = input.snr;\n    SF = input.sf;\n    freq = input.freq;\n    payload = (isNaN(extractID(nodedata).pay))? extractID(nodedata).pay : parseFloat(extractID(nodedata).pay);\n    node = extractID(nodedata).node;\n}else{\n    // Extract the data from the LoRa msg if ;-split string\n    input  = msg.payload.split(\";\");\n    nodedata = input[0];\n    if(!nodedata.startsWith(\"NO\")){\n        const decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n        nodedata = decrypt(nodedata);\n    }\n    gateway = extractID(input[1]).node;\n    RSSI = parseInt(input[2]);\n    SNR = parseFloat(input[3]);\n    SF = parseInt(input[4]);\n    freq = parseInt(input[5]);\n    payload = extractID(nodedata).pay;\n    node = extractID(nodedata).node;\n}\n\nignorelist = global.get(\"LORIDANE.ignorelist\")||[];\nignore = (ignorelist.indexOf(node) != -1 || ignorelist.indexOf(gateway) != -1);\nif(ignore)return;\nmsg.data = {};\n// object that takes all data from the msg\nmsg.data = {\n    pay: payload,\n    gw: gateway,\n    node: node,\n    freq: freq,\n    sf: SF,\n    rssi: RSSI,\n    snr: SNR,\n    lastSeen: now,\n};\n  \n//object that will be passed through the core nodes\nmsg.config = {\n    gw: gateway,\n    node: node,\n    freq: freq,\n    sf: SF,\n    lastSeen: now,\n};\nmsg.raw = raw; // the raw LoRa msg\nmsg.payload = payload; // the actual payload\nlet paylens = global.get(\"LORIDANE.values.lastPayloadLens\")||{historic:[],mean:50,toa:83,minInterval:4000};\nconst getMean = global.get(\"LORIDANE.funcs.math.getMean\");\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\nconst minInterval = global.get(\"LORIDANE.funcs.minInterval\");\n\nif(!isNaN(payloadLength = nodedata.toString().length) ){\n    paylens.historic.unshift(payloadLength);\n    if(paylens.historic.length > 60){\n    paylens.historic.pop();\n    }\n}\n\npaylens.mean = getMean(paylens.historic);\npaylens.toa = timeOnAir(paylens.mean,SF);\npaylens.minInterval = minInterval();\nglobal.set(\"LORIDANE.values.lastPayloadLens\", paylens);\n\nreturn msg;",
+        "func": "raw = msg.payload;\nif(raw === \"pong\")return;\nlet lastmsgs = context.get(\"lastmsgs\")||[];\nconst now  = Date.now();\nconst decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n\n//node.warn(raw)\nfunction extractID(pay){\n    let len = 14;\n    this.node = pay.slice(0,len);\n    this.pay = pay.slice(len,pay.length);\n    return this;\n}\n\nfunction extractDecipher(raw){\n    let message = raw.split('');\n    const payIndex = raw.indexOf('payload') +10;\n    const endIndex = raw.indexOf('gw') -3;\n    let cipherpay = message.splice(payIndex, endIndex - payIndex);\n    const decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n    let clearpay = decrypt(cipherpay.join(''));\n    //node.warn(clearpay)\n    clearpay = clearpay.split('');\n    message.splice(payIndex, 0, clearpay);\n    //node.warn(message.join(''))\n    return message.join('');\n}\n\n\nlet input;\n//*/Variant 1 raw json\nif(raw.startsWith(\"{\")){\n    //*/Variant 1 object\n    if(raw.includes('\"payload\":\"NO')){\n        try{\n            input = JSON.parse(raw);\n        }catch(e){\n            node.warn('There is something wrong with the JSON (Line 38)')\n        }\n    }else{\n        testcipher: if (msg.cipher){\n            let plain = decrypt(msg.cipher);\n            //node.warn(plain)\n            input = raw.substr(0,msg.startindex)+plain+raw.substr(msg.startindex+1);\n        }else{\n            break testcipher;\n        }\n        //node.warn(message)\n        try{\n            input = JSON.parse(input);\n        }catch(e){\n            node.warn(`There is something wrong with the JSON (Line 51) ERR: ${e}`)\n        }\n    }\n    nodedata = input.payload;\n    gateway = input.gw;\n    RSSI = input.rssi;\n    SNR = input.snr;\n    SF = input.sf;\n    freq = input.freq;\n    payload = (isNaN(extractID(nodedata).pay))? extractID(nodedata).pay : parseFloat(extractID(nodedata).pay);\n    node = extractID(nodedata).node;\n}else{\n    // Extract the data from the LoRa msg if ;-split string\n    input  = msg.payload.split(\";\");\n    nodedata = input[0];\n    if(!nodedata.startsWith(\"NO\")){\n        const decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n        nodedata = decrypt(nodedata);\n    }\n    gateway = extractID(input[1]).node;\n    RSSI = parseInt(input[2]);\n    SNR = parseFloat(input[3]);\n    SF = parseInt(input[4]);\n    freq = parseInt(input[5]);\n    payload = extractID(nodedata).pay;\n    node = extractID(nodedata).node;\n}\n\nignorelist = global.get(\"LORIDANE.ignorelist\")||[];\nignore = (ignorelist.indexOf(node) != -1 || ignorelist.indexOf(gateway) != -1);\nif(ignore)return;\nmsg.data = {};\n// object that takes all data from the msg\nmsg.data = {\n    pay: payload,\n    gw: gateway,\n    node: node,\n    freq: freq,\n    sf: SF,\n    rssi: RSSI,\n    snr: SNR,\n    lastSeen: now,\n};\n  \n//object that will be passed through the core nodes\nmsg.config = {\n    gw: gateway,\n    node: node,\n    freq: freq,\n    sf: SF,\n    lastSeen: now,\n};\nmsg.raw = raw; // the raw LoRa msg\nmsg.payload = payload; // the actual payload\nlet paylens = global.get(\"LORIDANE.values.lastPayloadLens\")||{historic:[],mean:50,toa:83,minInterval:4000};\nconst getMean = global.get(\"LORIDANE.funcs.math.getMean\");\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\nconst minInterval = global.get(\"LORIDANE.funcs.minInterval\");\n\nif(!isNaN(payloadLength = nodedata.toString().length) ){\n    paylens.historic.unshift(payloadLength);\n    if(paylens.historic.length > 60){\n    paylens.historic.pop();\n    }\n}\n\npaylens.mean = getMean(paylens.historic);\npaylens.toa = timeOnAir(paylens.mean,SF);\npaylens.minInterval = minInterval();\nglobal.set(\"LORIDANE.values.lastPayloadLens\", paylens);\n\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3917,6 +4914,79 @@
         ]
     },
     {
+        "id": "088ce0e8085dd6d5",
+        "type": "function",
+        "z": "4e984df.de567b4",
+        "name": "analyse Buffer",
+        "func": "paystartindex = msg.payload.indexOf(\n    Buffer.from([0x6c,0x6f,0x61,0x64,0x22,0x3a,0x22])\n    ) + 7; // = load\":\"\npayendindex = msg.payload.indexOf(\n    Buffer.from([0x22,0x2c,0x22,0x67,0x77])\n    ); // = \",\"gw:\n    \nlet inString = msg.payload.toString();\nmsg.startindex = paystartindex;\nmsg.endindex = payendindex;\n\nif (msg.payload[paystartindex] == 0x4e && msg.payload[paystartindex+1] == 0x4f){ // payload starts with NO\n    msg.payload = inString;\n    return msg;\n}else{\n    let cipher = inString.slice(paystartindex, payendindex);\n    msg.cipher = Buffer.from(cipher);\n    msg.payload = inString.slice(0,paystartindex) + inString.slice(payendindex+1);\n    return msg;\n}\n\nreturn;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 80,
+        "wires": [
+            [
+                "6a479509.a7889c"
+            ]
+        ]
+    },
+    {
+        "id": "11c9f05.acda51",
+        "type": "ui_group",
+        "name": "Admit Node",
+        "tab": "3dfe0b0a.ecf364",
+        "order": 1,
+        "disp": true,
+        "width": "8",
+        "collapse": false
+    },
+    {
+        "id": "3dfe0b0a.ecf364",
+        "type": "ui_tab",
+        "name": "Admittance",
+        "icon": "key",
+        "order": 7,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "2fad0fdc.1d24b",
+        "type": "subflow",
+        "name": "LORIDANE - Downlink",
+        "info": "",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 120,
+                "y": 100,
+                "wires": [
+                    {
+                        "id": "1a95a2d5.655b3d"
+                    }
+                ]
+            }
+        ],
+        "out": [],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "node-red/bridge-dash.svg",
+        "status": {
+            "x": 580,
+            "y": 160,
+            "wires": [
+                {
+                    "id": "1792be97.4020f1",
+                    "port": 0
+                }
+            ]
+        }
+    },
+    {
         "id": "90cd8175.15ea4",
         "type": "mqtt out",
         "z": "2fad0fdc.1d24b",
@@ -3956,7 +5026,7 @@
         "type": "function",
         "z": "2fad0fdc.1d24b",
         "name": "Send in Timerframe",
-        "func": "function sendmsg(msg){\n    node.send(msg)\n}\n\nfunction getSendTime(UID){\n    const findGW = global.get(\"LORIDANE.funcs.findGW\");\n    const gws = global.get(\"LORIDANE.devices.gw\") || [0];\n    let amountOfGws = gws.length; //defaults to 1\n    const indexGW = findGW(UID);\n    const sf = global.get(\"LORIDANE.devices.gw[0].sf\") || 7;\n    let sendtime = size - timeOnAir(50,sf) * (amountOfGws-indexGW);\n    return sendtime;\n}\n\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\n\n//-----------------------------------------------------------------\n// load needed data from context\nconst now = Date.now();\nconst sf = global.get(\"LORIDANE.devices.gw[0].sf\")||7;\nconst TS_SYNC = [19,34,61,111,206,386];\n\nlet lastmsg = context.get(\"lastmsg\")||0;\nlet startDisk = context.get(\"startDisk\")||lastmsg;\n\nlet timedisk = global.get(\"LORIDANE.timedisk\")||{size:1500,count:5};\nlet size = timedisk.size;\nlet timeinframe = (now-startDisk) % size;\n\nlet UID = msg.topic.substring(msg.topic.indexOf(\"GW\"), msg.topic.indexOf(\"GW\") + 14);\nlet sendtime = getSendTime(UID);\nlet untilsend = size - sendtime - timeinframe;\n\n// check when the timeframe for the gateway is reached\nif(timeinframe > sendtime - timeOnAir(30,sf) || untilsend < 0){\n    untilsend = 2 * size - timeinframe - sendtime;\n    setTimeout(sendmsg,untilsend,msg);\n}else{\n    setTimeout(sendmsg,untilsend,msg);\n    node.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\n}\ncontext.set(\"lastmsg\",now + untilsend);\n\n//check if in the to be confirmed array is old data\nlet confirm = global.get(\"LORIDANE.confirm\")||[];\nif (confirm.length > 0){\n    for(var con in confirm){\n        if(now - confirm[con].time >= 10*size){\n            confirm.splice(con,1);\n        }\n    }\n}\n\n//save outgoing msgs to the confirmation scope\nif(msg.payload.startsWith(\"NO\")){\n    obj = {uid: msg.payload.substring(0,14), out:msg.payload, time: now};\n    confirm.push(obj);\n}\n//except sync msgs\nif(msg.payload.includes(\"cn:\")){\n    if (!msg.payload.includes(\"sync\")){\n        nodes = global.get(\"LORIDANE.devices.nodes\");\n        for(var nd in nodes){\n            obj = {uid: nodes[nd].uid, out:msg.payload, time: now};\n            confirm.push(obj);\n        }\n    }else{\n        context.set(\"startDisk\",now+untilsend+TS_SYNC[sf-7]);\n    }\n    \n}\nglobal.set(\"LORIDANE.confirm\",confirm);\n\nnode.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\nsetTimeout(() => node.status({text:\"\"}),3000);\nreturn;",
+        "func": "function sendmsg(msg){\n    node.send(msg)\n}\n\nfunction getSendTime(UID){\n    const findGW = global.get(\"LORIDANE.funcs.findGW\");\n    const gws = global.get(\"LORIDANE.devices.gw\") || [0];\n    let amountOfGws = gws.length; //defaults to 1\n    const indexGW = findGW(UID);\n    const sf = global.get(\"LORIDANE.devices.gw[0].sf\") || 7;\n    let sendtime = size - timeOnAir(50,sf) * (amountOfGws-indexGW);\n    return sendtime;\n}\n\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\n\n//-----------------------------------------------------------------\n// load needed data from context\nconst now = Date.now();\nconst sf = global.get(\"LORIDANE.devices.gw[0].sf\")||7;\nconst TS_SYNC = [19,34,61,111,206,386];\n\nlet lastmsg = context.get(\"lastmsg\")||0;\nlet startDisk = context.get(\"startDisk\")||lastmsg;\n\nlet timedisk = global.get(\"LORIDANE.timedisk\")||{size:1500,count:5};\nlet size = timedisk.size;\nlet timeinframe = (now-startDisk) % size;\n\nlet UID = msg.topic.substring(msg.topic.indexOf(\"GW\"), msg.topic.indexOf(\"GW\") + 14);\nlet sendtime = getSendTime(UID);\nlet untilsend = size - sendtime - timeinframe;\n\n// check when the timeframe for the gateway is reached\nif (msg.payload.includes('td:')) {\n    sendmsg(msg);\n}else{\n    if(timeinframe > sendtime - timeOnAir(30,sf) || untilsend < 0){\n    untilsend = 2 * size - timeinframe - sendtime;\n    setTimeout(sendmsg,untilsend,msg);\n    }else{\n    setTimeout(sendmsg,untilsend,msg);\n    node.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\n    }    \n}\n\n\n\ncontext.set(\"lastmsg\",now + untilsend);\n\n//check if in the to be confirmed array is old data\nlet confirm = global.get(\"LORIDANE.confirm\")||[];\nif (confirm.length > 0){\n    for(var con in confirm){\n        if(now - confirm[con].time >= 10*size){\n            confirm.splice(con,1);\n        }\n    }\n}\n\n//save outgoing msgs to the confirmation scope\nif(msg.payload.startsWith(\"NO\")){\n    obj = {uid: msg.payload.substring(0,14), out:msg.payload, time: now};\n    confirm.push(obj);\n}\n//except sync msgs\nif(msg.payload.includes(\"cn:\")){\n    if (!msg.payload.includes(\"sync\")){\n        nodes = global.get(\"LORIDANE.devices.nodes\");\n        for(var nd in nodes){\n            obj = {uid: nodes[nd].uid, out:msg.payload, time: now};\n            confirm.push(obj);\n        }\n    }else{\n        context.set(\"startDisk\",now+untilsend+TS_SYNC[sf-7]);\n    }\n    \n}\nglobal.set(\"LORIDANE.confirm\",confirm);\n\nnode.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\nsetTimeout(() => node.status({text:\"\"}),3000);\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -3981,6 +5051,80 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "3be33484.0e776c",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "192.168.4.1",
+        "port": "1883",
+        "clientid": "",
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    },
+    {
+        "id": "364ae788.0e6328",
+        "type": "subflow",
+        "name": "LORIDANE - Save new devices",
+        "info": "Accepts two Inputs:\n - MQTT in listening to lora/gateway#\n - Inject node or similar that sends a\n    msg.topic of \"syncfrequency\"\n    if the gateway should listen to the standard frequency of 867MHz for 10 seconds at SF7\n\nIt then will add a configuration-file\nto /home/pi/gateway/\nfor each new Node\n\nIt has 3 Outputs:\n\n 1) Contains every (processed) message the MQTT In      receives in msg.data.\n 2) Should be conected to\n    \"Load Configuration from Files\", if that is wanted\n 3) Received Raw MQTT on msg.payload\n    and the configuration Data if new device binding is initiated via msg.topic = \"syncfrequency\"",
+        "category": "Loridane",
+        "in": [
+            {
+                "x": 80,
+                "y": 240,
+                "wires": [
+                    {
+                        "id": "82c27a6c.0a2258"
+                    },
+                    {
+                        "id": "77abdcc2.fad7c4"
+                    }
+                ]
+            }
+        ],
+        "out": [
+            {
+                "x": 940,
+                "y": 220,
+                "wires": [
+                    {
+                        "id": "aecffc67.3d552",
+                        "port": 0
+                    }
+                ]
+            }
+        ],
+        "env": [],
+        "meta": {
+            "license": "GPL-3.0"
+        },
+        "color": "#3FADB5",
+        "icon": "node-red/leveldb.png",
+        "status": {
+            "x": 420,
+            "y": 380,
+            "wires": [
+                {
+                    "id": "bd6188af.c82468",
+                    "port": 0
+                }
+            ]
+        }
     },
     {
         "id": "bd6188af.c82468",
@@ -4140,6 +5284,155 @@
         "wires": [
             []
         ]
+    },
+    {
+        "id": "4caa54e54d0ec49a",
+        "type": "change",
+        "z": "364ae788.0e6328",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "LORIDANE.values.lastPayloadLens.minInterval",
+                "tot": "global"
+            },
+            {
+                "t": "set",
+                "p": "topic",
+                "pt": "msg",
+                "to": "For the current parameters the minimum node interval is (ms):",
+                "tot": "str"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 575,
+        "y": 180,
+        "wires": [
+            [
+                "064c82486d9e8731"
+            ]
+        ],
+        "l": false
+    },
+    {
+        "id": "064c82486d9e8731",
+        "type": "ui_text",
+        "z": "364ae788.0e6328",
+        "group": "4640ddc61a547a32",
+        "order": 2,
+        "width": "8",
+        "height": "2",
+        "name": "",
+        "label": "{{msg.topic}}",
+        "format": "{{msg.payload}}",
+        "layout": "col-center",
+        "className": "",
+        "x": 700,
+        "y": 180,
+        "wires": []
+    },
+    {
+        "id": "4640ddc61a547a32",
+        "type": "ui_group",
+        "name": "Last Reading",
+        "tab": "278b2300.ae23ae",
+        "order": 2,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "278b2300.ae23ae",
+        "type": "ui_tab",
+        "name": "Messages",
+        "icon": "comment",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "20f0b4a8.24eafc",
+        "type": "tab",
+        "label": "LORIDANE",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "2baadb05.c532f4",
+        "type": "group",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "style": {
+            "fill": "#ffff3f",
+            "fill-opacity": "0.31",
+            "label": true
+        },
+        "nodes": [
+            "c3c07ea9.8a444",
+            "2269f9a3.74bc46",
+            "22e7e77c.e3a278",
+            "8b8be6c.bb37118",
+            "7f63c285.112a6c",
+            "9f216e3.3ebfd9",
+            "f7c8f902.ba6358",
+            "6f40b123.85031",
+            "a1c83a72.deb3d8",
+            "d92e9da8.79e03",
+            "40bc1de0.b21fe4",
+            "42890313.99adec",
+            "1a13b6b1f204b0e5"
+        ],
+        "x": 174,
+        "y": 699,
+        "w": 792,
+        "h": 422
+    },
+    {
+        "id": "4936118b.229c4",
+        "type": "group",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "style": {
+            "label": true,
+            "fill": "#3FADB5",
+            "fill-opacity": "0.26",
+            "stroke": "#3FADB5"
+        },
+        "nodes": [
+            "32bd7baa.d97b84",
+            "f4bb67bd.d39b98",
+            "8d9b21fb.c4275",
+            "91387791.465208",
+            "462cebc3.de6054",
+            "8ed3f24e.7d554",
+            "ae7a5c97.cc6aa",
+            "96e88eff.65928",
+            "84f194f0.98f118",
+            "514c816a.24ad6",
+            "48d31a4b.9b3544",
+            "713d228e.dde67c",
+            "dcee77a5.339a48",
+            "c2a7d48a.8b7dc8",
+            "ba03182a.053b38",
+            "a92d9ccf.7a839",
+            "c6397117.2fd33",
+            "b5c5836bfcd2b2f6",
+            "23ee3a1a1df01ae6",
+            "1405d54f20affd95",
+            "96668ca0cec58e41",
+            "e00e39905c1aa5d6"
+        ],
+        "x": 54,
+        "y": 179,
+        "w": 1272,
+        "h": 382
     },
     {
         "id": "c3c07ea9.8a444",
@@ -4323,6 +5616,9 @@
             ],
             [
                 "c2a7d48a.8b7dc8"
+            ],
+            [
+                "aa33286187a1d6b6"
             ]
         ]
     },
@@ -4609,7 +5905,7 @@
         "z": "20f0b4a8.24eafc",
         "g": "4936118b.229c4",
         "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -4676,7 +5972,7 @@
         "type": "debug",
         "z": "20f0b4a8.24eafc",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -4868,444 +6164,188 @@
         ]
     },
     {
-        "id": "e5410fa4.8b429",
-        "type": "function",
-        "z": "f74e4d3b7750f42f",
-        "name": "analyse payload",
-        "func": "if(msg.payload[0] == \"+\"){\n    return;\n}\n\nlet pay = [];\nlet payloadobject = {};\n\nif(typeof(msg.payload) != \"number\"){\n    if (msg.payload.includes(\";\")){\n        pay = msg.payload.split(\";\");    \n    }else{\n        pay[0] = msg.payload;\n    }\n}else{\n     pay[0] = msg.payload;\n}\n\n// split payloads to  measure0, measure1,....and so on\nlet i = 0;\nfor(let val of pay){\n    if(num = parseFloat(val), typeof(num) == \"number\"){\n        val = num;\n    }\n    payloadobject[`measure${i}`] = val;\n    i++;\n}\nmsg.payload = payloadobject;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 500,
-        "y": 180,
-        "wires": [
-            [
-                "11d81530.cba6ab"
-            ]
-        ]
-    },
-    {
-        "id": "11d81530.cba6ab",
-        "type": "function",
-        "z": "f74e4d3b7750f42f",
-        "name": "Set DataSet",
-        "func": "let data = msg.data\nconst UID = data.node;\nlet time = new Date(data.lastSeen)||new Date.now();\nlet showtime = time.toLocaleString(\"de-DE\");\nlet date = time.toISOString().substr(0,7);\nconst USER = global.get(\"LORIDANE.LinuxUsername\");\n\nmsg.payload.time = showtime;\nmsg.payload.timestamp = data.lastSeen;\nmsg.payload.uid = UID;\n\nif(msg.payload !== null)msg.filename = `/home/${USER}/LORIDANE/database/${UID}/${UID}_${date}.json`;\nmsg.dir = `/home/${USER}/LORIDANE/database/${UID}`;\nglobal.set(`LORIDANE.data.${UID}.lastreading`,msg.payload);\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 690,
-        "y": 180,
-        "wires": [
-            [
-                "40c4880ff2097a1c"
-            ]
-        ]
-    },
-    {
-        "id": "30afd728.c964c8",
-        "type": "file",
-        "z": "f74e4d3b7750f42f",
+        "id": "b5c5836bfcd2b2f6",
+        "type": "subflow:f74e4d3b7750f42f",
+        "z": "20f0b4a8.24eafc",
+        "g": "4936118b.229c4",
         "name": "",
-        "filename": "",
-        "appendNewline": true,
-        "createDir": true,
-        "overwriteFile": "false",
-        "encoding": "none",
-        "x": 870,
-        "y": 120,
-        "wires": [
-            []
-        ]
+        "env": [],
+        "x": 990,
+        "y": 280,
+        "wires": []
     },
     {
-        "id": "92174b3b.9e10f8",
-        "type": "switch",
-        "z": "f74e4d3b7750f42f",
-        "name": "filter",
-        "property": "data.node",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "neq",
-                "v": "NO94B97EC0C46C",
-                "vt": "str"
-            }
+        "id": "23ee3a1a1df01ae6",
+        "type": "subflow:b9c36c50122d3534",
+        "z": "20f0b4a8.24eafc",
+        "g": "4936118b.229c4",
+        "name": "",
+        "env": [],
+        "x": 1200,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "1405d54f20affd95",
+        "type": "link in",
+        "z": "20f0b4a8.24eafc",
+        "g": "4936118b.229c4",
+        "name": "",
+        "links": [
+            "dcee77a5.339a48"
         ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 1,
-        "x": 310,
-        "y": 200,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "74934f3780837a8f",
-        "type": "exec",
-        "z": "1395c386.064e8c",
-        "command": "pwd",
-        "addpay": "",
-        "append": "",
-        "useSpawn": "false",
-        "timer": "",
-        "winHide": false,
-        "oldrc": false,
-        "name": "",
-        "x": 390,
-        "y": 80,
+        "x": 815,
+        "y": 280,
         "wires": [
             [
-                "c868a2a20ad0f13a"
-            ],
-            [],
-            []
-        ]
-    },
-    {
-        "id": "c868a2a20ad0f13a",
-        "type": "function",
-        "z": "1395c386.064e8c",
-        "name": "Extract Username",
-        "func": "data = msg.payload;\n\ndata = data.split('/');\nlet user = data[data.length-1].replace('\\n','');\nglobal.set([\"LORIDANE.LinuxUsername\",\"LORIDANE.blockONstart\"],[user,true]);\nnode.status({text:\"Linux Username: \"+user});\nmsg.user = user;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 610,
-        "y": 80,
-        "wires": [
-            [
-                "a0be56ff.ac9d48"
+                "b5c5836bfcd2b2f6",
+                "96668ca0cec58e41"
             ]
         ]
     },
     {
-        "id": "114959bf99688411",
+        "id": "e00e39905c1aa5d6",
         "type": "debug",
-        "z": "f74e4d3b7750f42f",
+        "z": "20f0b4a8.24eafc",
+        "g": "4936118b.229c4",
         "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 510,
-        "y": 120,
-        "wires": []
-    },
-    {
-        "id": "135e5aaf42390a7a",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "Load Devices",
-        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nlet gws = global.get(\"LORIDANE.devices.gw\");\nlet options = [];\n\n// as list for the choose device dropdown load the device an if available the friendlyname\nfor (var node in nodes){\n    let name = \"\";\n    if(nodes[node].friendlyname != \"\" && nodes[node].friendlyname != undefined){\n        name = `${nodes[node].uid} - ${nodes[node].friendlyname}`;\n        options[node] = {[name]:nodes[node].uid};\n    }else{\n        name = `${nodes[node].uid}`;\n        options[node] = {[name]:nodes[node].uid} ;\n    }\n}\n\nreturn {options:options};",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 2140,
-        "wires": [
-            [
-                "72fde4c855eb24ff"
-            ]
-        ]
-    },
-    {
-        "id": "72fde4c855eb24ff",
-        "type": "ui_dropdown",
-        "z": "922120e5.5b086",
-        "name": "Choose Node",
-        "label": "",
-        "tooltip": "",
-        "place": "Select Device to show last reading",
-        "group": "4640ddc61a547a32",
-        "order": 2,
-        "width": 7,
-        "height": 1,
-        "passthru": false,
-        "multiple": false,
-        "options": [],
-        "payload": "",
-        "topic": "nodes",
-        "topicType": "str",
-        "className": "",
-        "x": 540,
-        "y": 2140,
-        "wires": [
-            [
-                "bb83ef6a5cd436a5"
-            ]
-        ]
-    },
-    {
-        "id": "ff637a5bb7fe4c05",
-        "type": "ui_button",
-        "z": "922120e5.5b086",
-        "name": "reload nodes",
-        "group": "4640ddc61a547a32",
-        "order": 1,
-        "width": 1,
-        "height": 1,
-        "passthru": false,
-        "label": "",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "sync",
-        "payload": "",
-        "payloadType": "date",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 190,
-        "y": 2140,
-        "wires": [
-            [
-                "135e5aaf42390a7a"
-            ]
-        ]
-    },
-    {
-        "id": "169c9c4cc7c474e9",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "show last readings on dashboard",
-        "info": "",
-        "x": 250,
-        "y": 2100,
-        "wires": []
-    },
-    {
-        "id": "bb83ef6a5cd436a5",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "show data",
-        "func": "device = msg.payload;\nlastreading = global.get(`LORIDANE.data.${device}.lastreading`);\nmsg.topic = `Last received Value by ${device}:`;\nmsg.payload = JSON.stringify(lastreading,null,2);\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 730,
-        "y": 2140,
-        "wires": [
-            [
-                "5443800796eb539c"
-            ]
-        ]
-    },
-    {
-        "id": "5443800796eb539c",
-        "type": "ui_toast",
-        "z": "922120e5.5b086",
-        "position": "dialog",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 1,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 930,
-        "y": 2140,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "18a35225e6e17a87",
-        "type": "debug",
-        "z": "922120e5.5b086",
-        "name": "",
-        "active": true,
+        "active": false,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 630,
-        "y": 2340,
+        "x": 1190,
+        "y": 340,
         "wires": []
     },
     {
-        "id": "f87ec9a8d00816bc",
-        "type": "comment",
-        "z": "f74e4d3b7750f42f",
-        "name": "Write input data to files",
-        "info": "",
-        "x": 370,
-        "y": 80,
-        "wires": []
-    },
-    {
-        "id": "2b71bd33fe1bfb21",
-        "type": "comment",
-        "z": "f74e4d3b7750f42f",
-        "name": "connect switch into gap to filter particular nodes",
-        "info": "",
-        "x": 440,
-        "y": 240,
-        "wires": []
-    },
-    {
-        "id": "82015455d437d826",
-        "type": "ui_table",
-        "z": "d7577d7f.0f9b4",
-        "group": "3458ce4.31e1d32",
-        "name": "Incoming Data",
-        "order": 9,
-        "width": "18",
-        "height": "8",
-        "columns": [],
-        "outputs": 0,
-        "cts": false,
-        "x": 840,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "aca2a067f7c14a0a",
-        "type": "function",
-        "z": "d7577d7f.0f9b4",
-        "name": "read directory",
-        "func": "const databasePath = global.get(\"LORIDANE.settings.path.database\");\nconst fs = global.get(\"fs\");\nlet files = [];\nlet pathes = [];\n\n//--------------------------\nfunction traverseDir(dir) {\n    if(dir[dir.length-1]!= \"/\") dir = dir+\"/\";\n        fs.readdirSync(dir).forEach(file => {\n        let fullPath = dir+file;\n        \n        if (fs.lstatSync(fullPath).isDirectory()) {\n            traverseDir(fullPath);\n        } else {\n            files.push(file.replace(\".json\",\"\"));\n            pathes.push(fullPath)\n        }  \n   });\n   return pathes;\n}\n//--------------------------\n\n\ntraverseDir(databasePath);\njsons = [];\n\nfor (let file of pathes){\n    if(file.endsWith(\".json\")){\n        jsons.push(file);\n    }\n}\n\nmsg.filePaths = jsons;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 340,
-        "y": 460,
-        "wires": [
-            [
-                "7ac36e992ff6e17a"
-            ]
-        ]
-    },
-    {
-        "id": "c8031ef90f17bdf7",
-        "type": "debug",
-        "z": "d7577d7f.0f9b4",
+        "id": "96668ca0cec58e41",
+        "type": "subflow:b5aa0f5765475d21",
+        "z": "20f0b4a8.24eafc",
+        "g": "4936118b.229c4",
         "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 590,
-        "y": 400,
-        "wires": []
-    },
-    {
-        "id": "7ac36e992ff6e17a",
-        "type": "function",
-        "z": "d7577d7f.0f9b4",
-        "name": "get tail of every file",
-        "func": "let tailLen;\nif(msg.topic == \"tailLen\"){\n    context.set(\"tailLen\", msg.payload);\n    return;\n}else{\n    tailLen = context.get(\"tailLen\")||\"5\";\n}\n\nfor(let path of msg.filePaths){\n    node.send({path:`tail -${tailLen} ${path}`, topic: false})\n    //node.warn(path)\n}\n\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 420,
-        "y": 520,
+        "env": [],
+        "x": 980,
+        "y": 340,
         "wires": [
             [
-                "1a0460b0be60f5db"
+                "e00e39905c1aa5d6"
             ]
         ]
     },
     {
-        "id": "380320e9e2346798",
-        "type": "exec",
-        "z": "d7577d7f.0f9b4",
-        "command": "",
-        "addpay": "path",
-        "append": "",
-        "useSpawn": "false",
-        "timer": "",
-        "winHide": false,
-        "oldrc": false,
-        "name": "tail file ends from database",
-        "x": 540,
-        "y": 580,
+        "id": "1a13b6b1f204b0e5",
+        "type": "inject",
+        "z": "20f0b4a8.24eafc",
+        "g": "2baadb05.c532f4",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": "11",
+        "topic": "lora/GWF008D1C8D658",
+        "payload": "NO84CCA84ADF70iv:5000",
+        "payloadType": "str",
+        "x": 330,
+        "y": 740,
         "wires": [
             [
-                "f3d923e18e539d3a"
-            ],
-            [],
-            []
+                "8b8be6c.bb37118"
+            ]
+        ],
+        "info": "Sends Timesync to Nodes"
+    },
+    {
+        "id": "16b7636aa918d881",
+        "type": "inject",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 1500,
+        "y": 540,
+        "wires": [
+            [
+                "06788427bde848a3"
+            ]
         ]
     },
     {
-        "id": "f9da180cb6c4e409",
+        "id": "06788427bde848a3",
         "type": "function",
-        "z": "d7577d7f.0f9b4",
-        "name": "parse json and write file to object",
-        "func": "dataArr = context.get(\"dataArr\") || [];\n\nif(msg.path !== undefined){\n    lastDevice = msg.path.split(\"/\")\n    lastDevice = lastDevice[lastDevice.length -2]\n    context.set(\"lastDevice\",lastDevice);\n}else{\n    lastDevice = context.get(\"lastDevice\")\n}\n\nif (msg.payload !== \"\" && msg.payload !== undefined){\n    lastLines = msg.payload.split(\"\\n\")\n    lastLines.splice(lastLines.length-1,1);\n    for (let line of lastLines){\n        obj = {Device:lastDevice, ...JSON.parse(line)}\n        dataArr.push(obj);\n    }\n    context.set(\"dataArr\",dataArr);\n}\n\nif(msg.topic === true){\n    context.set(\"dataArr\",[]);\n    node.send({payload:[]});\n    dataArr.sort( function(a,b){return b.timestamp - a.timestamp} );\n    return {payload: dataArr};\n}\nreturn;",
+        "z": "20f0b4a8.24eafc",
+        "name": "Load Files",
+        "func": "const fs = global.get(\"fs\");\nconst homepath = global.get(\"LORIDANE.settings.path.database\");\nlet files = [];\nlet pathes = [];\n\nfunction traverseDir(dir) {\n    if(dir[dir.length-1]!= \"/\") dir = dir+\"/\";\n        fs.readdirSync(dir).forEach(file => {\n        let fullPath = dir+file;\n        \n        if (fs.lstatSync(fullPath).isDirectory()) {\n            traverseDir(fullPath);\n        } else {\n            files.push(file.replace(\".json\",\"\"));\n            pathes.push(fullPath)\n        }  \n   });\n   return pathes;\n}\n\ntraverseDir(homepath);\nmsg.files = files;\nmsg.pathes = pathes;\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 920,
+        "x": 1650,
         "y": 560,
         "wires": [
             [
-                "82015455d437d826"
+                "c25fe67afc2bd567",
+                "40ea27940353c873",
+                "48e1ec0e129b27d9"
             ]
         ]
     },
     {
-        "id": "04de0d0b8bcf8885",
+        "id": "40ea27940353c873",
         "type": "function",
-        "z": "d7577d7f.0f9b4",
-        "name": "filter msgs < 30 seconds",
-        "func": "const now = Date.now()\nconst lasttime = context.get(\"lasttime\") || now;\nlet interval = now - lasttime;\nlet timer = context.get(\"timer\");\nclearTimeout(timer);\ncontext.set(\"timer\",timer);\nsetTimeout(()=>node.status({}),5000);\n\nif(interval <= 30000){\n    timer = setTimeout(()=>{\n        node.send({payload:now});\n        node.status({text:\"Table Updated\"})\n        },\n        30000)\n    context.set(\"timer\",timer);\n    node.status({text:\"Msg Filtered\"})\n    return;\n}\n\nreturn;",
+        "z": "20f0b4a8.24eafc",
+        "name": "export to CSV",
+        "func": "\tconst fs = global.get(\"fs\");\n\tconst homepath = global.get(\"LORIDANE.settings.path.database\");\n\tconst files = msg.files;\n\tconst pathes = msg.pathes;\n\tlet content = {};\n\tconst delimiter = global.get(\"LORIDANE.settings.csvDelimiter\")\n\t// foos-------------------------------------------------\n\tfunction parseJSON(str) {\n\t   try {\n\t      return JSON.parse(str);\n\t   }\n\t   catch (e) {\n\t      //node.warn(e);\n\t      return;\n\t   }\n\t}\n\t\n\tfunction getFirstLine(obj){\n\t    let props = Object.keys(obj);\n\t    return props.join(';')+'\\n';\n\t}\n\t\n\tfunction readFile2Arr(path){\n\t    let output = [];\n\t    let lines;\n\t    const fs = global.get(\"fs\");\n\t    try {\n\t        lines = fs.readFileSync(path).toString().split(\"\\n\");\n\t    }\n\t    catch (e){\n\t        node.warn(e);\n\t        return;\n\t    }\n\t    \n\t    for(let line of lines){\n\t        output.push(parseJSON(line));\n\t    }\n\t    return output;\n\t}\n\t\n\tfunction makeCSV(line){\n\t    let output = '';\n\t    let arr;\n\t    try{\n\t        arr = Object.values(line);\n\t    }\n\t    catch(e){\n\t        return;\n\t    }\n\t    \n\t    output = arr.join(delimiter);\n\t    return output + '\\n';\n\t}\n\t\n\tfunction * readFiles(pathes, files){\n\t    let len = files.length;\n\t    for (let path in pathes){\n\t        let fileContent = readFile2Arr(pathes[path]);\n\t        \n\t        let firstLine = getFirstLine(fileContent[0]);\n\t        let file = firstLine;\n\t        for (let line of fileContent){\n\t            file += makeCSV(line);\n\t        }\n\t        yield {name:files[path]+'.csv',content:file,stateQuo:`Processing File ${parseInt(path)+1} of ${len}.`};\n\t    }\n\t}\n\t//foos end----------------------------------------------------\n\tlet read = readFiles(pathes,files);\n\t\n\tcontent = read.next();\n\twhile (!content.done) {\n\t        node.send({topic:content.value.stateQuo,toast:true});\n\t        fs.writeFileSync(homepath+content.value.name,content.value.content);\n\t        content = read.next();\n\t}\n\tnode.send({topic: `All Files exported to CSV. They are in ${homepath}`,toast:false});\n\t\n\treturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 175,
-        "y": 460,
+        "x": 1920,
+        "y": 580,
         "wires": [
             [
-                "aca2a067f7c14a0a"
+                "48e1ec0e129b27d9"
             ]
-        ],
-        "icon": "node-red-contrib-throttle/throttle.png",
-        "l": false
+        ]
     },
     {
-        "id": "3474282182622796",
+        "id": "6160c8e61024f0a1",
         "type": "ui_button",
-        "z": "d7577d7f.0f9b4",
+        "z": "20f0b4a8.24eafc",
         "name": "",
-        "group": "3458ce4.31e1d32",
-        "order": 8,
+        "group": "06efc03a6ebef2e8",
+        "order": 0,
         "width": 0,
         "height": 0,
         "passthru": false,
-        "label": "UPDATE TABLE",
+        "label": "Export Node Data as CSV",
         "tooltip": "",
         "color": "",
         "bgcolor": "",
@@ -5315,77 +6355,60 @@
         "payloadType": "date",
         "topic": "topic",
         "topicType": "msg",
-        "x": 340,
-        "y": 420,
+        "x": 1470,
+        "y": 620,
         "wires": [
             [
-                "aca2a067f7c14a0a"
+                "06788427bde848a3"
             ]
         ]
     },
     {
-        "id": "453ef5400f2519f0",
-        "type": "ui_dropdown",
-        "z": "d7577d7f.0f9b4",
-        "name": "how many historic values",
-        "label": "Amount of historic values",
-        "tooltip": "",
-        "place": "How many per device?",
-        "group": "3458ce4.31e1d32",
-        "order": 7,
-        "width": 0,
-        "height": 0,
-        "passthru": true,
-        "multiple": false,
-        "options": [
-            {
-                "label": "",
-                "value": "5",
-                "type": "str"
-            },
-            {
-                "label": "",
-                "value": 1,
-                "type": "num"
-            },
-            {
-                "label": "",
-                "value": "2",
-                "type": "str"
-            },
-            {
-                "label": "",
-                "value": "10",
-                "type": "str"
-            },
-            {
-                "label": "",
-                "value": "20",
-                "type": "str"
-            }
-        ],
-        "payload": "",
-        "topic": "tailLen",
-        "topicType": "str",
+        "id": "3661e3d9a3c9ca57",
+        "type": "ui_toast",
+        "z": "20f0b4a8.24eafc",
+        "position": "top right",
+        "displayTime": "5",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
         "className": "",
-        "x": 170,
+        "topic": "",
+        "name": "Toast Notification",
+        "x": 2210,
         "y": 520,
-        "wires": [
-            [
-                "7ac36e992ff6e17a"
-            ]
-        ]
+        "wires": []
     },
     {
-        "id": "1a0460b0be60f5db",
-        "type": "switch",
-        "z": "d7577d7f.0f9b4",
+        "id": "c25fe67afc2bd567",
+        "type": "debug",
+        "z": "20f0b4a8.24eafc",
         "name": "",
-        "property": "topic",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1810,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "48e1ec0e129b27d9",
+        "type": "switch",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "property": "toast",
         "propertyType": "msg",
         "rules": [
             {
-                "t": "true"
+                "t": "false"
             },
             {
                 "t": "else"
@@ -5394,38 +6417,193 @@
         "checkall": "true",
         "repair": false,
         "outputs": 2,
-        "x": 555,
-        "y": 520,
+        "x": 2075,
+        "y": 540,
         "wires": [
             [
-                "f9da180cb6c4e409",
-                "c8031ef90f17bdf7"
+                "3661e3d9a3c9ca57"
             ],
             [
-                "380320e9e2346798"
+                "8c2e6ec2ea15bed3"
             ]
         ],
         "l": false
     },
     {
-        "id": "f3d923e18e539d3a",
+        "id": "8c2e6ec2ea15bed3",
+        "type": "ui_toast",
+        "z": "20f0b4a8.24eafc",
+        "position": "dialog",
+        "displayTime": "5",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "msg.topic",
+        "name": "Toast Notification",
+        "x": 2210,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "4782ee921ccea2a0",
+        "type": "debug",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 466,
+        "y": 27,
+        "wires": []
+    },
+    {
+        "id": "130c5da2f67ec7ca",
+        "type": "inject",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 160,
+        "y": 620,
+        "wires": [
+            [
+                "f4bb67bd.d39b98"
+            ]
+        ]
+    },
+    {
+        "id": "aa33286187a1d6b6",
+        "type": "debug",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 458,
+        "wires": []
+    },
+    {
+        "id": "f1febfb44eaf1004",
+        "type": "comment",
+        "z": "20f0b4a8.24eafc",
+        "name": "block nodes from sending",
+        "info": "",
+        "x": 1527,
+        "y": 282,
+        "wires": []
+    },
+    {
+        "id": "2429192024c4fc1f",
+        "type": "ui_button",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "group": "b27ef2892ca432db",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Nodes Send Unblock",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1627,
+        "y": 322,
+        "wires": [
+            [
+                "3705e1e876de47c6"
+            ]
+        ]
+    },
+    {
+        "id": "215752aacc202220",
+        "type": "ui_button",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "group": "b27ef2892ca432db",
+        "order": 9,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "Nodes Sendblock",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 1607,
+        "y": 362,
+        "wires": [
+            [
+                "3705e1e876de47c6"
+            ]
+        ]
+    },
+    {
+        "id": "3705e1e876de47c6",
         "type": "function",
-        "z": "d7577d7f.0f9b4",
-        "name": "wait until timeout",
-        "func": "let timer = context.get(\"timer\")||null;\nclearTimeout(timer);\n\ncontext.set(\"timer\",setTimeout(() => node.send({topic:true}),200));\nreturn msg;",
+        "z": "20f0b4a8.24eafc",
+        "name": "build blocksend payload",
+        "func": "const gws = global.get(\"LORIDANE.devices.gw\");\n\nfunction senddelayed(msg){\n    node.send(msg);\n}\n\nlet outString;\nif (msg.payload){\n    outString = 'cn:BL:1';\n} else {\n    outString = 'cn:BL:0';\n}\n\ntime = 0;\nadditionalDelay = 50;\n\nfor (let gw in gws) {\n    obj = {payload: outString, topic:`lora/${gws[gw].uid}`};\n    setTimeout(senddelayed,time,obj);\n}\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 715,
-        "y": 580,
+        "x": 1850,
+        "y": 380,
         "wires": [
             [
-                "f9da180cb6c4e409"
+                "462cebc3.de6054"
             ]
-        ],
-        "l": false
+        ]
+    },
+    {
+        "id": "0b3f1702fe1b5fd1",
+        "type": "tab",
+        "label": "Beispiel Tasks",
+        "disabled": false,
+        "info": ""
     },
     {
         "id": "f94736f23109f93d",
@@ -5897,206 +7075,6 @@
         "wires": []
     },
     {
-        "id": "165abd08ab5997d3",
-        "type": "serial in",
-        "z": "b9c36c50122d3534",
-        "name": "Listen to device",
-        "serial": "d726f7d4.e188a8",
-        "x": 100,
-        "y": 160,
-        "wires": [
-            [
-                "489395b840d57d55",
-                "20afc46063fc460e",
-                "d0db093491b0175f"
-            ]
-        ]
-    },
-    {
-        "id": "9443f601f2e54a8b",
-        "type": "serial out",
-        "z": "b9c36c50122d3534",
-        "name": "Write to device",
-        "serial": "d726f7d4.e188a8",
-        "x": 840,
-        "y": 200,
-        "wires": []
-    },
-    {
-        "id": "489395b840d57d55",
-        "type": "function",
-        "z": "b9c36c50122d3534",
-        "name": "parse serial input stream",
-        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\nmsg = {payload: trigger};\n\ncases = [\n    \"Please Enter Your WiFi-SSID\",\n    \"Please Enter Your WiFi-Password\",\n    \"Please Enter the Address Of Your MQTT Broker without the Port\",\n    \"Please Enter the Username Of Your MQTT Broker\",\n    \"Please Enter the Password for Your MQTT Broker\",\n    ]\n    \nlet autoOutput;\nfor(let pat in cases){\n    if (trigger.includes(cases[pat])){\n        let gatewayConfig = global.get(\"LORIDANE.settings.gatewayConfig\") || {};\n        if (gatewayConfig != {} && gatewayConfig.automatic){\n            let autoOutput = '';\n            node.warn('Gateway Auto Configuration')\n            switch(pat){\n                case \"0\":\n                    autoOutput = gatewayConfig.ssid+'\\n';\n                    break;\n                case \"1\":\n                    autoOutput = gatewayConfig.wpwd+'\\n';\n                    break;\n                case \"2\":\n                    autoOutput = gatewayConfig.broker+'\\n';\n                    break;\n                case \"3\":\n                    autoOutput = gatewayConfig.user+'\\n';\n                    break;\n                case \"4\":\n                    autoOutput = gatewayConfig.mpwd+'\\n';\n                    break;\n                default:\n                    node.warn('no case met')\n                    return;\n            }\n            return [null,{payload:autoOutput}];\n        }\n        return [msg,null];\n    }else{\n        continue;  \n    }\n}\nreturn;",
-        "outputs": 2,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 310,
-        "y": 180,
-        "wires": [
-            [
-                "2025553245eafb29",
-                "0081140cd5374547"
-            ],
-            [
-                "9443f601f2e54a8b"
-            ]
-        ]
-    },
-    {
-        "id": "53bfad030d9cd90a",
-        "type": "ui_toast",
-        "z": "b9c36c50122d3534",
-        "position": "prompt",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 1,
-        "ok": "OK",
-        "cancel": "Cancel",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "Input Dialog Creds",
-        "x": 610,
-        "y": 160,
-        "wires": [
-            [
-                "9443f601f2e54a8b",
-                "2025553245eafb29"
-            ]
-        ]
-    },
-    {
-        "id": "a1af85d35eb7dacf",
-        "type": "ui_button",
-        "z": "b9c36c50122d3534",
-        "name": "",
-        "group": "4073e498fd9f7db7",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "WiFi Credentials",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "wifi",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 660,
-        "y": 120,
-        "wires": [
-            [
-                "9443f601f2e54a8b"
-            ]
-        ]
-    },
-    {
-        "id": "6525c9359d920c7a",
-        "type": "ui_button",
-        "z": "b9c36c50122d3534",
-        "name": "",
-        "group": "4073e498fd9f7db7",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "MQTT Credentials",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "mqtt",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 670,
-        "y": 80,
-        "wires": [
-            [
-                "9443f601f2e54a8b"
-            ]
-        ]
-    },
-    {
-        "id": "20afc46063fc460e",
-        "type": "debug",
-        "z": "b9c36c50122d3534",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 330,
-        "y": 60,
-        "wires": []
-    },
-    {
-        "id": "2025553245eafb29",
-        "type": "debug",
-        "z": "b9c36c50122d3534",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 790,
-        "y": 300,
-        "wires": []
-    },
-    {
-        "id": "d0db093491b0175f",
-        "type": "function",
-        "z": "b9c36c50122d3534",
-        "name": "Confirmation",
-        "func": "trigger = msg.payload;\n//trigger.replace(/\\r\\n|\\r|\\n/g,\"\")\n\nmsg = {payload: trigger, topic: \"Answer:\"};\nif(trigger.includes(\"Message arrived\"))return;\ncases = [\n    \", IP address:\",\n    \"Please Enter Your WiFi-Password\",\n    \"[WIFI] Connecting to\",\n    \"MQTT Credentials updated\",\n    \"Subscribing to topic:\",\n    \"lora/GW\"\n    ]\n\nfor(var pat of cases){\n    if (trigger.includes(pat)){\n        return msg;\n    }else{\n        continue;  \n    }\n}\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 230,
-        "y": 240,
-        "wires": [
-            [
-                "7909a4c4cc9cbfb7"
-            ]
-        ]
-    },
-    {
-        "id": "7909a4c4cc9cbfb7",
-        "type": "ui_toast",
-        "z": "b9c36c50122d3534",
-        "position": "top right",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 0,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 270,
-        "y": 300,
-        "wires": []
-    },
-    {
         "id": "53e53fc1526674a7",
         "type": "function",
         "z": "0b3f1702fe1b5fd1",
@@ -6164,42 +7142,6 @@
         "info": "",
         "x": 300,
         "y": 680,
-        "wires": []
-    },
-    {
-        "id": "f17a47f02ba50177",
-        "type": "status",
-        "z": "f74e4d3b7750f42f",
-        "name": "",
-        "scope": [
-            "30afd728.c964c8"
-        ],
-        "x": 690,
-        "y": 300,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "b5c5836bfcd2b2f6",
-        "type": "subflow:f74e4d3b7750f42f",
-        "z": "20f0b4a8.24eafc",
-        "g": "4936118b.229c4",
-        "name": "",
-        "env": [],
-        "x": 990,
-        "y": 280,
-        "wires": []
-    },
-    {
-        "id": "23ee3a1a1df01ae6",
-        "type": "subflow:b9c36c50122d3534",
-        "z": "20f0b4a8.24eafc",
-        "g": "4936118b.229c4",
-        "name": "",
-        "env": [],
-        "x": 1200,
-        "y": 280,
         "wires": []
     },
     {
@@ -6576,312 +7518,6 @@
         "wires": []
     },
     {
-        "id": "1405d54f20affd95",
-        "type": "link in",
-        "z": "20f0b4a8.24eafc",
-        "g": "4936118b.229c4",
-        "name": "",
-        "links": [
-            "dcee77a5.339a48"
-        ],
-        "x": 815,
-        "y": 280,
-        "wires": [
-            [
-                "b5c5836bfcd2b2f6",
-                "96668ca0cec58e41"
-            ]
-        ]
-    },
-    {
-        "id": "e00e39905c1aa5d6",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "g": "4936118b.229c4",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1190,
-        "y": 340,
-        "wires": []
-    },
-    {
-        "id": "3126adbea28f66af",
-        "type": "function",
-        "z": "b5aa0f5765475d21",
-        "name": "analyse payload",
-        "func": "if(msg.payload[0] == \"+\"){\n    return;\n}\n\nlet pay = [];\nlet payloadobject = {};\nconst fullData = msg.data;\n\nif(typeof(msg.payload) != \"number\"){\n    if (msg.payload.includes(\";\")){\n        pay = msg.payload.split(\";\");    \n    }else{\n        pay[0] = msg.payload;\n    }\n}else{\n     pay[0] = msg.payload;\n}\n\n// split payloads to  measure0, measure1,....and so on\nlet i = 0;\nfor(let val of pay){\n    if(typeof(val) == \"number\"){\n        val = parseFloat(val);\n    }\n    payloadobject[`measure${i}`] = val;\n    i++;\n}\n\nmsg.payload = {...payloadobject, ...fullData};\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 340,
-        "y": 120,
-        "wires": [
-            [
-                "80c1923731d9fae4"
-            ]
-        ]
-    },
-    {
-        "id": "80c1923731d9fae4",
-        "type": "function",
-        "z": "b5aa0f5765475d21",
-        "name": "Set DataSet",
-        "func": "let data = msg.data\nlet time = new Date(data.lastSeen)||new Date.now();\nlet showtime = time.toLocaleString(\"de-DE\");\nlet date = time.toISOString().substr(0,7);\n\nmsg.payload.time = showtime;\nmsg.payload.timestamp = data.lastSeen;\ndelete msg.payload.lastSeen;\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 530,
-        "y": 120,
-        "wires": [
-            [
-                "84383d973c491d60",
-                "c0a3aa7bc8ce6775"
-            ]
-        ]
-    },
-    {
-        "id": "84383d973c491d60",
-        "type": "mqtt out",
-        "z": "b5aa0f5765475d21",
-        "name": "Forward Msg",
-        "topic": "loridane/forwarded/",
-        "qos": "0",
-        "retain": "false",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "3be33484.0e776c",
-        "x": 730,
-        "y": 160,
-        "wires": []
-    },
-    {
-        "id": "96668ca0cec58e41",
-        "type": "subflow:b5aa0f5765475d21",
-        "z": "20f0b4a8.24eafc",
-        "g": "4936118b.229c4",
-        "name": "",
-        "env": [],
-        "x": 980,
-        "y": 340,
-        "wires": [
-            [
-                "e00e39905c1aa5d6"
-            ]
-        ]
-    },
-    {
-        "id": "17fe14ee4d16cfb1",
-        "type": "mqtt in",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "topic": "loridane/forwarded/#",
-        "qos": "0",
-        "datatype": "auto",
-        "broker": "3be33484.0e776c",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "x": 300,
-        "y": 1220,
-        "wires": [
-            [
-                "19158d68a284d78f"
-            ]
-        ]
-    },
-    {
-        "id": "19158d68a284d78f",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 490,
-        "y": 1220,
-        "wires": []
-    },
-    {
-        "id": "debfef189baa4009",
-        "type": "inject",
-        "z": "1395c386.064e8c",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": true,
-        "onceDelay": "15",
-        "topic": "",
-        "payloadType": "date",
-        "x": 250,
-        "y": 400,
-        "wires": [
-            [
-                "e179ea2166d2107f"
-            ]
-        ]
-    },
-    {
-        "id": "2c702d141039671f",
-        "type": "exec",
-        "z": "1395c386.064e8c",
-        "command": "sudo systemctl start mosquitto",
-        "addpay": "",
-        "append": "",
-        "useSpawn": "false",
-        "timer": "",
-        "winHide": false,
-        "oldrc": false,
-        "name": "",
-        "x": 990,
-        "y": 400,
-        "wires": [
-            [],
-            [],
-            []
-        ]
-    },
-    {
-        "id": "e179ea2166d2107f",
-        "type": "exec",
-        "z": "1395c386.064e8c",
-        "command": "pidof mosquitto",
-        "addpay": "",
-        "append": "",
-        "useSpawn": "false",
-        "timer": "",
-        "winHide": false,
-        "oldrc": false,
-        "name": "",
-        "x": 440,
-        "y": 400,
-        "wires": [
-            [
-                "58b96b7be58245f6",
-                "83738104877ee419"
-            ],
-            [],
-            []
-        ]
-    },
-    {
-        "id": "58b96b7be58245f6",
-        "type": "function",
-        "z": "1395c386.064e8c",
-        "name": "return if payload undefined",
-        "func": "if(!msg.payload){\n    return msg;\n}\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 680,
-        "y": 380,
-        "wires": [
-            [
-                "83738104877ee419",
-                "2c702d141039671f"
-            ]
-        ]
-    },
-    {
-        "id": "83738104877ee419",
-        "type": "debug",
-        "z": "1395c386.064e8c",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 630,
-        "y": 480,
-        "wires": []
-    },
-    {
-        "id": "40c4880ff2097a1c",
-        "type": "function",
-        "z": "f74e4d3b7750f42f",
-        "name": "write dataset to File",
-        "func": "const fs = global.get(\"fs\");\nconst dir = msg.dir;\ntry{\n    fs.appendFile(msg.filename, JSON.stringify(msg.payload)+'\\n', err => {\n    if (err) node.warn(err);\n    if (!fs.existsSync(dir)){\n        fs.mkdirSync(dir);\n        fs.appendFileSync(msg.filename,JSON.stringify(msg.payload)+'\\n');\n    }\n    });\n    \n}catch(err) {\n    node.warn(err)\n    fs.writeFileSync(msg.filename, JSON.stringify(msg.payload)+'\\n');\n}\n  //file written successfully\nnode.status({text:msg.filename});\nreturn msg;",
-        "outputs": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 890,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "1a13b6b1f204b0e5",
-        "type": "inject",
-        "z": "20f0b4a8.24eafc",
-        "g": "2baadb05.c532f4",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "11",
-        "topic": "lora/GWF008D1C8D658",
-        "payload": "NO84CCA84ADF70iv:5000",
-        "payloadType": "str",
-        "x": 330,
-        "y": 740,
-        "wires": [
-            [
-                "8b8be6c.bb37118"
-            ]
-        ],
-        "info": "Sends Timesync to Nodes"
-    },
-    {
-        "id": "4e3da284381029d7",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "export json data to csv",
-        "info": "",
-        "x": 220,
-        "y": 2320,
-        "wires": []
-    },
-    {
         "id": "822f389b917b8cc5",
         "type": "debug",
         "z": "0b3f1702fe1b5fd1",
@@ -6899,888 +7535,25 @@
         "wires": []
     },
     {
-        "id": "8a33cd54dd60903a",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "Conf Nodes",
-        "info": "",
-        "x": 440,
-        "y": 760,
-        "wires": []
-    },
-    {
-        "id": "9f4e050b99467b7a",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "Conf Gateway",
-        "info": "",
-        "x": 490,
-        "y": 1180,
-        "wires": []
-    },
-    {
-        "id": "4de74e1b8bf6ca3d",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "Conf Global",
-        "info": "",
-        "x": 570,
-        "y": 1580,
-        "wires": []
-    },
-    {
-        "id": "09401e9c92cd3373",
-        "type": "ui_button",
-        "z": "922120e5.5b086",
-        "name": "",
-        "group": "d7396f84.84707",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "restart loridane",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "Are You Sure You Want Loridane to restart?",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 1320,
-        "y": 160,
-        "wires": [
-            [
-                "3154fa6e600c0b82"
-            ]
-        ]
-    },
-    {
-        "id": "3154fa6e600c0b82",
-        "type": "ui_toast",
-        "z": "922120e5.5b086",
-        "position": "dialog",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 1,
-        "ok": "OK",
-        "cancel": "Cancel",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 1510,
-        "y": 160,
-        "wires": [
-            [
-                "8774253d35564225"
-            ]
-        ]
-    },
-    {
-        "id": "8774253d35564225",
-        "type": "switch",
-        "z": "922120e5.5b086",
-        "name": "",
-        "property": "payload",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "eq",
-                "v": "OK",
-                "vt": "str"
-            },
-            {
-                "t": "neq",
-                "v": "OK",
-                "vt": "str"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 1680,
-        "y": 160,
-        "wires": [
-            [
-                "7f5864c8ac1fc3f8",
-                "9a41840a9d647987"
-            ],
-            [
-                "315de8a6055d3a4c"
-            ]
-        ]
-    },
-    {
-        "id": "315de8a6055d3a4c",
-        "type": "ui_toast",
-        "z": "922120e5.5b086",
-        "position": "top right",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 0,
-        "ok": "OK",
-        "cancel": "Cancel",
-        "raw": false,
-        "topic": "",
-        "name": "Cancelled",
-        "x": 1880,
-        "y": 220,
-        "wires": []
-    },
-    {
-        "id": "2408fcb4bd699283",
-        "type": "exec",
-        "z": "922120e5.5b086",
-        "command": "node-red-restart",
-        "addpay": "",
-        "append": "",
-        "useSpawn": "false",
-        "timer": "",
-        "winHide": false,
-        "oldrc": false,
-        "name": "",
-        "x": 2000,
-        "y": 120,
-        "wires": [
-            [],
-            [],
-            []
-        ]
-    },
-    {
-        "id": "197e647230936896",
-        "type": "inject",
-        "z": "922120e5.5b086",
-        "name": "Shutdown",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": "5",
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1330,
-        "y": 120,
-        "wires": [
-            [
-                "2408fcb4bd699283"
-            ]
-        ]
-    },
-    {
-        "id": "7f5864c8ac1fc3f8",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "write config",
-        "func": "writeConfig = global.get(\"LORIDANE.funcs.writeConfig\");\nwriteConfig(0 /**delay in ms*/);\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 2160,
-        "y": 180,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "9a41840a9d647987",
-        "type": "delay",
-        "z": "922120e5.5b086",
-        "name": "",
-        "pauseType": "delay",
-        "timeout": "2",
-        "timeoutUnits": "seconds",
-        "rate": "1",
-        "nbRateUnits": "1",
-        "rateUnits": "second",
-        "randomFirst": "1",
-        "randomLast": "5",
-        "randomUnits": "seconds",
-        "drop": false,
-        "x": 1835,
-        "y": 140,
-        "wires": [
-            [
-                "2408fcb4bd699283"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "55ebb76597ec0cd7",
-        "type": "mqtt in",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "topic": "lora/gateway/#",
-        "qos": "1",
-        "datatype": "buffer",
-        "broker": "3be33484.0e776c",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "x": 200,
-        "y": 1740,
-        "wires": [
-            [
-                "56b04d39a183b93b"
-            ]
-        ]
-    },
-    {
-        "id": "778a6a54095672e6",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "Process incoming Data",
-        "func": "function extractDecipher(raw){\n    const payIndex = 12;\n    let cipherpay = raw.slice(payIndex, 14);\n    const decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n    //node.warn(cipherpay.join(''))\n    let clearpay = decrypt(cipherpay);\n    //node.warn(clearpay)\n    //node.warn(message)\n    return clearpay;\n}\n\nclear = extractDecipher(msg.payload.toString());\nreturn {payload: clear.toString()};",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 890,
-        "y": 1680,
-        "wires": [
-            [
-                "840d64d817252e5e"
-            ]
-        ]
-    },
-    {
-        "id": "840d64d817252e5e",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1080,
-        "y": 1660,
-        "wires": []
-    },
-    {
-        "id": "33821aa6b1a0907a",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 710,
-        "y": 1720,
-        "wires": []
-    },
-    {
-        "id": "16b7636aa918d881",
-        "type": "inject",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 1500,
-        "y": 540,
-        "wires": [
-            [
-                "06788427bde848a3"
-            ]
-        ]
-    },
-    {
-        "id": "06788427bde848a3",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "Load Files",
-        "func": "const fs = global.get(\"fs\");\nconst homepath = global.get(\"LORIDANE.settings.path.database\");\nlet files = [];\nlet pathes = [];\n\nfunction traverseDir(dir) {\n    if(dir[dir.length-1]!= \"/\") dir = dir+\"/\";\n        fs.readdirSync(dir).forEach(file => {\n        let fullPath = dir+file;\n        \n        if (fs.lstatSync(fullPath).isDirectory()) {\n            traverseDir(fullPath);\n        } else {\n            files.push(file.replace(\".json\",\"\"));\n            pathes.push(fullPath)\n        }  \n   });\n   return pathes;\n}\n\ntraverseDir(homepath);\nmsg.files = files;\nmsg.pathes = pathes;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1650,
-        "y": 560,
-        "wires": [
-            [
-                "c25fe67afc2bd567",
-                "40ea27940353c873",
-                "48e1ec0e129b27d9"
-            ]
-        ]
-    },
-    {
-        "id": "40ea27940353c873",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "export to CSV",
-        "func": "\tconst fs = global.get(\"fs\");\n\tconst homepath = global.get(\"LORIDANE.settings.path.database\");\n\tconst files = msg.files;\n\tconst pathes = msg.pathes;\n\tlet content = {};\n\tconst delimiter = global.get(\"LORIDANE.settings.csvDelimiter\")\n\t// foos-------------------------------------------------\n\tfunction parseJSON(str) {\n\t   try {\n\t      return JSON.parse(str);\n\t   }\n\t   catch (e) {\n\t      //node.warn(e);\n\t      return;\n\t   }\n\t}\n\t\n\tfunction getFirstLine(obj){\n\t    let props = Object.keys(obj);\n\t    return props.join(';')+'\\n';\n\t}\n\t\n\tfunction readFile2Arr(path){\n\t    let output = [];\n\t    let lines;\n\t    const fs = global.get(\"fs\");\n\t    try {\n\t        lines = fs.readFileSync(path).toString().split(\"\\n\");\n\t    }\n\t    catch (e){\n\t        node.warn(e);\n\t        return;\n\t    }\n\t    \n\t    for(let line of lines){\n\t        output.push(parseJSON(line));\n\t    }\n\t    return output;\n\t}\n\t\n\tfunction makeCSV(line){\n\t    let output = '';\n\t    let arr;\n\t    try{\n\t        arr = Object.values(line);\n\t    }\n\t    catch(e){\n\t        return;\n\t    }\n\t    \n\t    output = arr.join(delimiter);\n\t    return output + '\\n';\n\t}\n\t\n\tfunction * readFiles(pathes, files){\n\t    let len = files.length;\n\t    for (let path in pathes){\n\t        let fileContent = readFile2Arr(pathes[path]);\n\t        \n\t        let firstLine = getFirstLine(fileContent[0]);\n\t        let file = firstLine;\n\t        for (let line of fileContent){\n\t            file += makeCSV(line);\n\t        }\n\t        yield {name:files[path]+'.csv',content:file,stateQuo:`Processing File ${parseInt(path)+1} of ${len}.`};\n\t    }\n\t}\n\t//foos end----------------------------------------------------\n\tlet read = readFiles(pathes,files);\n\t\n\tcontent = read.next();\n\twhile (!content.done) {\n\t        node.send({topic:content.value.stateQuo,toast:true});\n\t        fs.writeFileSync(homepath+content.value.name,content.value.content);\n\t        content = read.next();\n\t}\n\tnode.send({topic: `All Files exported to CSV. They are in ${homepath}`,toast:false});\n\t\n\treturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1920,
-        "y": 580,
-        "wires": [
-            [
-                "48e1ec0e129b27d9"
-            ]
-        ]
-    },
-    {
-        "id": "6160c8e61024f0a1",
-        "type": "ui_button",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "group": "06efc03a6ebef2e8",
-        "order": 0,
-        "width": 0,
-        "height": 0,
-        "passthru": false,
-        "label": "Export Node Data as CSV",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "date",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 1470,
-        "y": 620,
-        "wires": [
-            [
-                "06788427bde848a3"
-            ]
-        ]
-    },
-    {
-        "id": "3661e3d9a3c9ca57",
-        "type": "ui_toast",
-        "z": "20f0b4a8.24eafc",
-        "position": "top right",
-        "displayTime": "5",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 0,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "Toast Notification",
-        "x": 2210,
-        "y": 520,
-        "wires": []
-    },
-    {
-        "id": "c25fe67afc2bd567",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1810,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "56b04d39a183b93b",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "analyse buffer test",
-        "func": "buffer = msg.payload;\n\nstartindex = 12;\nendindex = 12+32;//buffer.indexOf(0x22,12);\n\nfirstpart = buffer.slice(0,startindex)\npayload = buffer.slice(startindex,endindex);\nendpart = buffer.slice(endindex);\nmsg.payload = {encrypted: payload,start:firstpart, end:endpart, text:firstpart.toString()+endpart.toString()}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 500,
-        "y": 1780,
-        "wires": [
-            [
-                "33821aa6b1a0907a",
-                "310a7533ec09e440"
-            ]
-        ]
-    },
-    {
-        "id": "310a7533ec09e440",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "decryption test",
-        "func": "decrypt = global.get(\"LORIDANE.funcs.decrypt\");\n\n//node.warn(msg.payload.encrypted);\nmsg.decrypt = decrypt(msg.payload.encrypted);\n\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 830,
-        "y": 1800,
-        "wires": [
-            [
-                "d27eaeece1281a25"
-            ]
-        ]
-    },
-    {
-        "id": "d27eaeece1281a25",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 1030,
-        "y": 1800,
-        "wires": []
-    },
-    {
-        "id": "48e1ec0e129b27d9",
-        "type": "switch",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "property": "toast",
-        "propertyType": "msg",
-        "rules": [
-            {
-                "t": "false"
-            },
-            {
-                "t": "else"
-            }
-        ],
-        "checkall": "true",
-        "repair": false,
-        "outputs": 2,
-        "x": 2075,
-        "y": 540,
-        "wires": [
-            [
-                "3661e3d9a3c9ca57"
-            ],
-            [
-                "8c2e6ec2ea15bed3"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "8c2e6ec2ea15bed3",
-        "type": "ui_toast",
-        "z": "20f0b4a8.24eafc",
-        "position": "dialog",
-        "displayTime": "5",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 1,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "msg.topic",
-        "name": "Toast Notification",
-        "x": 2210,
-        "y": 580,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "5731a85d08ea3dd5",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "clear Ignore an admission list",
-        "func": "list = [];\nglobal.set(\"LORIDANE.ignorelist\",list);\nglobal.set(\"LORIDANE.admit\",list);\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 500,
-        "y": 640,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "12abec650d9f6642",
-        "type": "ui_button",
-        "z": "922120e5.5b086",
-        "name": "",
-        "group": "1152859e.ef93ba",
-        "order": 1,
+        "id": "06efc03a6ebef2e8",
+        "type": "ui_group",
+        "name": "Export Files",
+        "tab": "1809f267.7a279e",
+        "order": 8,
+        "disp": true,
         "width": "8",
-        "height": 1,
-        "passthru": false,
-        "label": "clear ignorelist",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "date",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 260,
-        "y": 640,
-        "wires": [
-            [
-                "5731a85d08ea3dd5"
-            ]
-        ]
+        "collapse": false,
+        "className": ""
     },
     {
-        "id": "4782ee921ccea2a0",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 466,
-        "y": 27,
-        "wires": []
-    },
-    {
-        "id": "4caa54e54d0ec49a",
-        "type": "change",
-        "z": "364ae788.0e6328",
-        "name": "",
-        "rules": [
-            {
-                "t": "set",
-                "p": "payload",
-                "pt": "msg",
-                "to": "LORIDANE.values.lastPayloadLens.minInterval",
-                "tot": "global"
-            },
-            {
-                "t": "set",
-                "p": "topic",
-                "pt": "msg",
-                "to": "For the current parameters the minimum node interval is (ms):",
-                "tot": "str"
-            }
-        ],
-        "action": "",
-        "property": "",
-        "from": "",
-        "to": "",
-        "reg": false,
-        "x": 575,
-        "y": 180,
-        "wires": [
-            [
-                "064c82486d9e8731"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "064c82486d9e8731",
-        "type": "ui_text",
-        "z": "364ae788.0e6328",
-        "group": "4640ddc61a547a32",
-        "order": 2,
+        "id": "b27ef2892ca432db",
+        "type": "ui_group",
+        "name": "Block Nodes",
+        "tab": "1809f267.7a279e",
+        "order": 7,
+        "disp": true,
         "width": "8",
-        "height": "2",
-        "name": "",
-        "label": "{{msg.topic}}",
-        "format": "{{msg.payload}}",
-        "layout": "col-center",
-        "className": "",
-        "x": 700,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "b62026e6367c3ae2",
-        "type": "function",
-        "z": "c23de0ef.dae5f",
-        "name": "set sync interval",
-        "func": "const interval = global.get(\"LORIDANE.settings.syncInterval\")||233;\n\nfunction trigger(){\n    node.send({payload:true});\n}\n\nlet intVal = context.get(\"intVal\");\nclearInterval(intVal);\n\nintVal = setInterval(trigger,interval * 1000);\ncontext.set(\"intVal\",intVal);\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 380,
-        "y": 80,
-        "wires": [
-            [
-                "47d49580.9cf8dc"
-            ]
-        ]
-    },
-    {
-        "id": "0081140cd5374547",
-        "type": "function",
-        "z": "b9c36c50122d3534",
-        "name": "filter null msg",
-        "func": "if (msg === null){\n    return;\n}\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 475,
-        "y": 160,
-        "wires": [
-            [
-                "53bfad030d9cd90a"
-            ]
-        ],
-        "l": false
-    },
-    {
-        "id": "e604d18b909fb87d",
-        "type": "debug",
-        "z": "b9c36c50122d3534",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 610,
-        "y": 360,
-        "wires": []
-    },
-    {
-        "id": "c293f39ddc15f47b",
-        "type": "function",
-        "z": "1395c386.064e8c",
-        "name": "reset device data scope",
-        "func": "let lastdata = global.get(\"LORIDANE.data\");\nconst findNode = global.get(\"LORIDANE.funcs.findNode\");\nlet datakeys = Object.keys(lastdata);\nlet newdata = {};\n\nfor (let key of datakeys) {\n    if(findNode(key) > -1){\n        newdata[key] = lastdata[key];\n    }\n}\nglobal.set(\"LORIDANE.data\", newdata);\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1150,
-        "y": 260,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "d3b20f62a67c2b0b",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "test inject",
-        "func": "payload = {\"payload\":\"NOF008D1C8DC2022.1;43.8\",\"gw\":\"GWF008D1C8D658\",\"rssi\":-69,\"snr\":9.750000,\"sf\":7,\"freq\":867000000};\nbuf = Buffer.from(JSON.stringify(payload));\nmsg.payload = buf;\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 290,
-        "y": 1400,
-        "wires": [
-            [
-                "f4bb67bd.d39b98"
-            ]
-        ]
-    },
-    {
-        "id": "130c5da2f67ec7ca",
-        "type": "inject",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 100,
-        "y": 1400,
-        "wires": [
-            [
-                "d3b20f62a67c2b0b"
-            ]
-        ]
-    },
-    {
-        "id": "803dcd521104fd55",
-        "type": "function",
-        "z": "20f0b4a8.24eafc",
-        "name": "analyse Buffer",
-        "func": "paystartindex = msg.payload.indexOf(\n    Buffer.from([0x6c,0x6f,0x61,0x64,0x22,0x3a,0x22])\n    ) + 7; // = load\":\"\npayendindex = msg.payload.indexOf(\n    Buffer.from([0x22,0x2c,0x22,0x67,0x77])\n    ); // = \",\"gw:\n    \nlet inString = msg.payload.toString();\nmsg.startindex = paystartindex;\nmsg.endindex = payendindex;\n\nif (msg.payload[paystartindex] == 0x4e && msg.payload[paystartindex+1] == 0x4f){ // payload starts with NO\n    msg.payload = inString;\n    return msg;\n}else{\n    let cipher = inString.slice(paystartindex, payendindex);\n    msg.cipher = Buffer.from(cipher);\n    msg.payload = inString.slice(0,paystartindex) + inString.slice(payendindex);\n    return msg;\n}\n\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 500,
-        "y": 1400,
-        "wires": [
-            [
-                "ea584e6facdc9a6a"
-            ]
-        ]
-    },
-    {
-        "id": "8427f182b7810f64",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": false,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "false",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 510,
-        "y": 1340,
-        "wires": []
-    },
-    {
-        "id": "ea584e6facdc9a6a",
-        "type": "debug",
-        "z": "20f0b4a8.24eafc",
-        "name": "",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 690,
-        "y": 1400,
-        "wires": []
-    },
-    {
-        "id": "088ce0e8085dd6d5",
-        "type": "function",
-        "z": "4e984df.de567b4",
-        "name": "analyse Buffer",
-        "func": "paystartindex = msg.payload.indexOf(\n    Buffer.from([0x6c,0x6f,0x61,0x64,0x22,0x3a,0x22])\n    ) + 7; // = load\":\"\npayendindex = msg.payload.indexOf(\n    Buffer.from([0x22,0x2c,0x22,0x67,0x77])\n    ); // = \",\"gw:\n    \nlet inString = msg.payload.toString();\nmsg.startindex = paystartindex;\nmsg.endindex = payendindex;\n\nif (msg.payload[paystartindex] == 0x4e && msg.payload[paystartindex+1] == 0x4f){ // payload starts with NO\n    msg.payload = inString;\n    return msg;\n}else{\n    let cipher = inString.slice(paystartindex, payendindex);\n    msg.cipher = Buffer.from(cipher);\n    msg.payload = inString.slice(0,paystartindex) + inString.slice(payendindex);\n    return msg;\n}\n\nreturn;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 180,
-        "y": 80,
-        "wires": [
-            [
-                "6a479509.a7889c"
-            ]
-        ]
-    },
-    {
-        "id": "c0a3aa7bc8ce6775",
-        "type": "function",
-        "z": "b5aa0f5765475d21",
-        "d": true,
-        "name": "set OPC_UA Parameters",
-        "func": "return;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 710,
-        "y": 220,
-        "wires": [
-            [
-                "209a8f28dc1f12d2"
-            ]
-        ]
-    },
-    {
-        "id": "209a8f28dc1f12d2",
-        "type": "OpcUa-Client",
-        "z": "b5aa0f5765475d21",
-        "d": true,
-        "endpoint": "",
-        "action": "write",
-        "deadbandtype": "a",
-        "deadbandvalue": 1,
-        "time": 10,
-        "timeUnit": "s",
-        "certificate": "n",
-        "localfile": "",
-        "localkeyfile": "",
-        "securitymode": "None",
-        "securitypolicy": "None",
-        "name": "",
-        "x": 940,
-        "y": 220,
-        "wires": [
-            []
-        ]
+        "collapse": false,
+        "className": ""
     }
 ]
