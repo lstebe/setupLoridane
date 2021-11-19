@@ -261,7 +261,6 @@ if whiptail --yesno --defaultno "Script finished. Would you like to REBOOT NOW? 
 	reboot now
 else
 	echo "LORIDANE - Okay, no reboot. Script finished"
-	node-red-start
 fi
 
 
