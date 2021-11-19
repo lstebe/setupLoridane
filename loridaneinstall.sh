@@ -53,7 +53,7 @@ cd "$datafolder"
 echo "LORIDANE - Found Homedirecory as $homedir"
 echo "LORIDANE - Data Folder is $datafolder"
 echo "Press Ctrl+C to Cancel"
-sleep 5
+sleep 10
 
 
 ## Ask user for permission to create a wifi AP
