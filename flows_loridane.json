@@ -1150,6 +1150,7 @@
         "ok": "OK",
         "cancel": "",
         "raw": false,
+        "className": "",
         "topic": "",
         "name": "show GUI Confirmation",
         "x": 440,
@@ -1163,8 +1164,8 @@
         "group": "3458ce4.31e1d32",
         "name": "Incoming Data",
         "order": 9,
-        "width": "18",
-        "height": "8",
+        "width": 18,
+        "height": 8,
         "columns": [],
         "outputs": 0,
         "cts": false,
@@ -1569,8 +1570,8 @@
         ],
         "out": [
             {
-                "x": 1440,
-                "y": 460,
+                "x": 1600,
+                "y": 1000,
                 "wires": [
                     {
                         "id": "53654a49.b88fe4",
@@ -1578,6 +1579,10 @@
                     },
                     {
                         "id": "1733b022.f7d1a",
+                        "port": 0
+                    },
+                    {
+                        "id": "13ae9bb0.19ccf4",
                         "port": 0
                     }
                 ]
@@ -2391,7 +2396,7 @@
         "type": "function",
         "z": "922120e5.5b086",
         "name": "Send configuration to nodes",
-        "func": "if(!msg.topic){\n    return;\n}\ndata = msg.payload.data;\nnstream = \"cn:\";\n\ngateways = [];\nnodes = msg.payload.nodes;\nfor(i=nodes.length-1;i>=0;i--){\n    if(nodes[i].startsWith(\"GW\")){\n        gateways.push(nodes[i]);\n    }else{\n        break;\n    }\n}\n\nkeys = Object.keys(data);\nfor(var key of keys){\n    if(data[key] === 0){\n        continue;\n    }\n    switch(key){\n        case \"freq\":\n            freq = data.freq;\n            freq*=10;\n            nstream += \"fn:\"+freq+\";\";\n            break;\n        case \"tx\":\n            nstream += \"tn:\"+data.tx+\";\";\n            break;\n        case \"iv\":\n            nstream += \"iv:\"+data.iv+\";\";\n            break;\n        case \"sf\":\n            nstream += \"sn:\"+data.sf+\";\";\n    }\n}\nif (nstream == 'cn')return;\nlet gstream = nstream.replace(\"cn\",\"cg\").replace(\"fn\",\"fg\").replace(\"sn\",\"sg\");\n\nfor (var gw of gateways){\n    topic = \"lora/\"+gw;\n    node.send({payload:nstream,topic:topic});\n    node.send({payload:gstream,topic:topic});\n}\nreturn;",
+        "func": "if(!msg.topic){\n    return;\n}\ndata = msg.payload.data;\n\nfunction senddelayed(msg,delay){\n    setTimeout( ()=>node.send(msg), delay)\n}\n\nnstream = \"cn:\";\ntdsize = global.get(\"LORIDANE.timedisk.size\")\ngateways = [];\nnodes = msg.payload.nodes;\nfor(i=nodes.length-1;i>=0;i--){\n    if(nodes[i].startsWith(\"GW\")){\n        gateways.push(nodes[i]);\n    }else{\n        break;\n    }\n}\n\nkeys = Object.keys(data);\nfor(var key of keys){\n    if(data[key] === 0){\n        continue;\n    }\n    switch(key){\n        case \"freq\":\n            freq = data.freq;\n            freq*=10;\n            nstream += \"fn:\"+freq+\";\";\n            break;\n        case \"tx\":\n            nstream += \"tn:\"+data.tx+\";\";\n            break;\n        case \"iv\":\n            nstream += \"iv:\"+data.iv+\";\";\n            break;\n        case \"sf\":\n            nstream += \"sn:\"+data.sf+\";\";\n    }\n}\nif (nstream == 'cn')return;\nlet gstream = nstream.replace(\"cn\",\"cg\").replace(\"fn\",\"fg\").replace(\"sn\",\"sg\");\n\nfor (var gw of gateways){\n    topic = \"lora/\"+gw;\n    node.send({payload:nstream,topic:topic});\n    senddelayed({payload:gstream,topic:topic},tdsize)\n}\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -2614,6 +2619,7 @@
         "type": "subflow:2fad0fdc.1d24b",
         "z": "922120e5.5b086",
         "name": "",
+        "env": [],
         "x": 1520,
         "y": 860,
         "wires": []
@@ -3613,130 +3619,6 @@
         "wires": []
     },
     {
-        "id": "135e5aaf42390a7a",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "Load Devices",
-        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nlet gws = global.get(\"LORIDANE.devices.gw\");\nlet options = [];\n\n// as list for the choose device dropdown load the device an if available the friendlyname\nfor (var node in nodes){\n    let name = \"\";\n    if(nodes[node].friendlyname != \"\" && nodes[node].friendlyname != undefined){\n        name = `${nodes[node].uid} - ${nodes[node].friendlyname}`;\n        options[node] = {[name]:nodes[node].uid};\n    }else{\n        name = `${nodes[node].uid}`;\n        options[node] = {[name]:nodes[node].uid} ;\n    }\n}\n\nreturn {options:options};",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 360,
-        "y": 2140,
-        "wires": [
-            [
-                "72fde4c855eb24ff"
-            ]
-        ]
-    },
-    {
-        "id": "72fde4c855eb24ff",
-        "type": "ui_dropdown",
-        "z": "922120e5.5b086",
-        "name": "Choose Node",
-        "label": "",
-        "tooltip": "",
-        "place": "Select Device to show last reading",
-        "group": "4640ddc61a547a32",
-        "order": 2,
-        "width": 7,
-        "height": 1,
-        "passthru": false,
-        "multiple": false,
-        "options": [],
-        "payload": "",
-        "topic": "nodes",
-        "topicType": "str",
-        "className": "",
-        "x": 540,
-        "y": 2140,
-        "wires": [
-            [
-                "bb83ef6a5cd436a5"
-            ]
-        ]
-    },
-    {
-        "id": "ff637a5bb7fe4c05",
-        "type": "ui_button",
-        "z": "922120e5.5b086",
-        "name": "reload nodes",
-        "group": "4640ddc61a547a32",
-        "order": 1,
-        "width": 1,
-        "height": 1,
-        "passthru": false,
-        "label": "",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "sync",
-        "payload": "",
-        "payloadType": "date",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 190,
-        "y": 2140,
-        "wires": [
-            [
-                "135e5aaf42390a7a"
-            ]
-        ]
-    },
-    {
-        "id": "169c9c4cc7c474e9",
-        "type": "comment",
-        "z": "922120e5.5b086",
-        "name": "show last readings on dashboard",
-        "info": "",
-        "x": 250,
-        "y": 2100,
-        "wires": []
-    },
-    {
-        "id": "bb83ef6a5cd436a5",
-        "type": "function",
-        "z": "922120e5.5b086",
-        "name": "show data",
-        "func": "device = msg.payload;\nlastreading = global.get(`LORIDANE.data.${device}.lastreading`);\nmsg.topic = `Last received Value by ${device}:`;\nmsg.payload = JSON.stringify(lastreading,null,2);\nreturn msg;",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 730,
-        "y": 2140,
-        "wires": [
-            [
-                "5443800796eb539c"
-            ]
-        ]
-    },
-    {
-        "id": "5443800796eb539c",
-        "type": "ui_toast",
-        "z": "922120e5.5b086",
-        "position": "dialog",
-        "displayTime": "3",
-        "highlight": "",
-        "sendall": true,
-        "outputs": 1,
-        "ok": "OK",
-        "cancel": "",
-        "raw": false,
-        "className": "",
-        "topic": "",
-        "name": "",
-        "x": 930,
-        "y": 2140,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "8a33cd54dd60903a",
         "type": "comment",
         "z": "922120e5.5b086",
@@ -4016,86 +3898,6 @@
         "collapse": false
     },
     {
-        "id": "f798079b.0c85e8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 3,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "fe39cdd7.d53ea",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 5,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "905bed34.63eb3",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 6,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "b762c9b2.4a59b8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 7,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "db209ff8.5830f",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 8,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "41a7925c.8a3c6c",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 9,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "a6441479.e064f8",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 10,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "5e652f73.af4fe",
-        "type": "ui_spacer",
-        "z": "922120e5.5b086",
-        "name": "spacer",
-        "group": "bf837bc6.2c47f8",
-        "order": 11,
-        "width": 1,
-        "height": 1
-    },
-    {
         "id": "a3b84e04.bcada",
         "type": "ui_group",
         "name": "Configure Single Node",
@@ -4146,18 +3948,6 @@
         "disp": true,
         "width": "8",
         "collapse": false
-    },
-    {
-        "id": "bf837bc6.2c47f8",
-        "type": "ui_group",
-        "d": true,
-        "name": "ONRO",
-        "tab": "278b2300.ae23ae",
-        "order": 3,
-        "disp": true,
-        "width": "8",
-        "collapse": false,
-        "className": ""
     },
     {
         "id": "7f451d99.cdaae4",
@@ -4697,7 +4487,7 @@
         "type": "function",
         "z": "ada10296.06249",
         "name": "send new Timedisk",
-        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nconst gws = global.get(\"LORIDANE.devices.gw\");\nnodes = nodes.concat(gws); \nlastnodes = context.get(\"lastnodes\")||[];\ncontext.set(\"lastnodes\",nodes);\ntdsize = msg.payload.size;\nlet newtd = false;\nsubito = (msg.topic == \"subito\");\n//node.warn(subito) //debugging\nlet disk = {}; //global.get(\"LORIDANE.timedisk.disk\")||{};\nlet time;\nlet additionalDelay;\n(tdsize -10 < 1e5) ? additionalDelay = 100: additionalDelay = tdsize -30;\n\nsetTimeout(()=>node.status({}),5000);\n\nfunction senddelayed(obj){\n    node.send(obj);\n}\n\nif(lastnodes.length === 0){\n    for(i=0 , all = nodes.length; i < all ; i++){\n        if(nodes[i].uid != lastnodes[i].uid){\n            newtd = true;\n            break;\n        }\n    }\n}\n\nfind = global.get(\"LORIDANE.funcs.findNode\");\ngetconf = global.get(\"LORIDANE.funcs.getConfig\");\n\ncount = 0;\nnewtd = true;\nif (newtd && !subito){\n    time = 50;\n    sentUID = {};\n    for (var gw in gws){\n        obj = {payload:`cn:BL:1`,topic:`lora/${gws[gw].uid}`};\n        setTimeout(senddelayed,time,obj);\n        time += additionalDelay;\n        for (i=0;i<nodes.length;i++){\n            obj = {payload:`${nodes[i].uid}td:${count};${tdsize};`,topic:`lora/${gws[gw].uid}`};\n            if(sentUID[`${nodes[i].uid}`] === undefined){\n                setTimeout(senddelayed,time,obj);\n                time += additionalDelay;\n                disk[nodes[i].uid] = {uid:nodes[i].uid,slot:count,tdsize:tdsize};\n                sentUID[`${nodes[i].uid}`] = {};\n                sentUID[`${nodes[i].uid.count}`] = count;\n                count++;\n            }\n        }\n        obj = {payload:`cn:sync`,topic:`lora/${gws[gw].uid}`};\n        //setTimeout(senddelayed,time,obj);\n    }\n    node.status({text: \"Sent new Timedisk\"});\n}\nglobal.set(\"LORIDANE.timedisk.disk\",disk);\n\nfor (let gw in gws){\n    time += additionalDelay; \n    obj = {payload:`cn:BL:0`,topic:`lora/${gws[gw].uid}`};\n    setTimeout(senddelayed,time,obj);\n    \n}\n\n\nif(subito){\n    devs = global.get(\"LORIDANE.classA\");\n    getconf = global.get(\"LORIDANE.funcs.getConfig\");\n    for (var dev of devs){\n        if(disk[dev] !== undefined){\n            //node.warn(disk)\n            obj = {payload:`${dev}td:${disk[dev].slot};${disk[dev].tdsize};`,topic:`lora/${getconf(dev).nextGW}`};\n            senddelayed(obj);\n        }\n    }\n}\n\nreturn;",
+        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nconst gws = global.get(\"LORIDANE.devices.gw\");\nnodes = nodes.concat(gws); \nlastnodes = context.get(\"lastnodes\")||[];\ncontext.set(\"lastnodes\",nodes);\ntdsize = msg.payload.size;\nlet newtd = false;\nsubito = (msg.topic == \"subito\");\n//node.warn(subito) //debugging\nlet disk = {}; //global.get(\"LORIDANE.timedisk.disk\")||{};\nlet time;\nlet additionalDelay;\n//(tdsize -10 < 1e5) ? additionalDelay = 50 : additionalDelay = tdsize -30;\nadditionalDelay = 70;\n\nsetTimeout(()=>node.status({}),5000);\n\nfunction senddelayed(obj){\n    node.send(obj);\n}\n\nif(lastnodes.length === 0){\n    for(i=0 , all = nodes.length; i < all ; i++){\n        if(nodes[i].uid != lastnodes[i].uid){\n            newtd = true;\n            break;\n        }\n    }\n}\n\nfind = global.get(\"LORIDANE.funcs.findNode\");\ngetconf = global.get(\"LORIDANE.funcs.getConfig\");\n\ncount = 0;\nnewtd = true;\nif (newtd && !subito){\n    time = 50;\n    sentUID = {};\n    for (var gw in gws){\n        obj = {payload:`cn:BL:1`,topic:`lora/${gws[gw].uid}`};\n        setTimeout(senddelayed,time,obj);\n        time += additionalDelay;\n        for (i=0;i<nodes.length;i++){\n            obj = {payload:`${nodes[i].uid}td:${count};${tdsize};`,topic:`lora/${gws[gw].uid}`};\n            if(sentUID[`${nodes[i].uid}`] === undefined){\n                setTimeout(senddelayed,time,obj);\n                time += additionalDelay;\n                disk[nodes[i].uid] = {uid:nodes[i].uid,slot:count,tdsize:tdsize};\n                sentUID[`${nodes[i].uid}`] = {};\n                sentUID[`${nodes[i].uid.count}`] = count;\n                count++;\n            }\n        }\n        obj = {payload:`cn:sync`,topic:`lora/${gws[gw].uid}`};\n        //setTimeout(senddelayed,time,obj);\n    }\n    node.status({text: \"Sent new Timedisk\"});\n}\nglobal.set(\"LORIDANE.timedisk.disk\",disk);\n\nfor (let gw in gws){\n    time += additionalDelay; \n    obj = {payload:`cn:BL:0`,topic:`lora/${gws[gw].uid}`};\n    setTimeout(senddelayed,time,obj);\n}\n\n\nif(subito){\n    devs = global.get(\"LORIDANE.classA\");\n    getconf = global.get(\"LORIDANE.funcs.getConfig\");\n    for (var dev of devs){\n        if(disk[dev] !== undefined){\n            //node.warn(disk)\n            obj = {payload:`${dev}td:${disk[dev].slot};${disk[dev].tdsize};`,topic:`lora/${getconf(dev).nextGW}`};\n            senddelayed(obj);\n        }\n    }\n}\n\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -5054,7 +4844,7 @@
         "type": "function",
         "z": "4e984df.de567b4",
         "name": "admit",
-        "func": "node = msg.data.node;\ngw = msg.data.gw;\npayload = msg.payload;\n\nfindGW = global.get(\"LORIDANE.funcs.findGW\");\nfindNode = global.get(\"LORIDANE.funcs.findNode\");\nadmit = global.get(\"LORIDANE.admit\")||[];\ncheckUID = global.get(\"LORIDANE.funcs.checkUID\");\n\n\nindexgw = findGW(gw);\nindexnode = findNode(node);\n\nUIDvalid = (checkUID(node) && checkUID(gw));\nif((indexgw >= 0 && indexnode >= 0) || !UIDvalid )return;\n\nif(indexgw == -1){\n    admit.push(gw);\n}\n\nif(indexnode == -1){\n    if(payload == node){\n        admit.push(node);\n    }\n}\n\nglobal.set(\"LORIDANE.admit\",admit);\n\nif(admit.length > 0){\n    msg.admit = admit;\n    return msg;\n}\nreturn;",
+        "func": "node = msg.data.node;\ngw = msg.data.gw;\npayload = msg.payload;\n\nif(payload != node)return;\n\nfindGW = global.get(\"LORIDANE.funcs.findGW\");\nfindNode = global.get(\"LORIDANE.funcs.findNode\");\nadmit = global.get(\"LORIDANE.admit\")||[];\ncheckUID = global.get(\"LORIDANE.funcs.checkUID\");\n\n\nindexgw = findGW(gw);\nindexnode = findNode(node);\n\nUIDvalid = (checkUID(node) && checkUID(gw));\nif((indexgw >= 0 && indexnode >= 0) || !UIDvalid )return;\n\nif(indexgw == -1){\n    admit.push(gw);\n}\n\nif(indexnode == -1){\n    if(payload == node){\n        admit.push(node);\n    }\n}\n\nglobal.set(\"LORIDANE.admit\",admit);\n\nif(admit.length > 0){\n    msg.admit = admit;\n    return msg;\n}\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -5412,7 +5202,7 @@
         "type": "function",
         "z": "2fad0fdc.1d24b",
         "name": "Send in Timerframe",
-        "func": "function sendmsg(msg){\n    node.send(msg)\n}\n\nfunction getSendTime(UID){\n    const findGW = global.get(\"LORIDANE.funcs.findGW\");\n    const gws = global.get(\"LORIDANE.devices.gw\") || [0];\n    let amountOfGws = gws.length; //defaults to 1\n    const indexGW = findGW(UID);\n    const sf = global.get(\"LORIDANE.devices.gw[0].sf\") || 7;\n    let sendtime = size - timeOnAir(50,sf) * (amountOfGws-indexGW);\n    return sendtime;\n}\n\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\n\n//-----------------------------------------------------------------\n// load needed data from context\nconst now = Date.now();\nconst sf = global.get(\"LORIDANE.devices.gw[0].sf\")||7;\nconst TS_SYNC = [19,34,61,111,206,386];\n\nlet lastmsg = context.get(\"lastmsg\")||0;\nlet startDisk = context.get(\"startDisk\")||lastmsg;\n\nlet timedisk = global.get(\"LORIDANE.timedisk\")||{size:1500,count:5};\nlet size = timedisk.size;\nlet timeinframe = (now-startDisk) % size;\n\nlet UID = msg.topic.substring(msg.topic.indexOf(\"GW\"), msg.topic.indexOf(\"GW\") + 14);\nlet sendtime = getSendTime(UID);\nlet untilsend = size - sendtime - timeinframe;\n\n// check when the timeframe for the gateway is reached\nif (msg.payload.includes('td:')) {\n    sendmsg(msg);\n}else{\n    if(timeinframe > sendtime - timeOnAir(30,sf) || untilsend < 0){\n    untilsend = 2 * size - timeinframe - sendtime;\n    setTimeout(sendmsg,untilsend,msg);\n    }else{\n    setTimeout(sendmsg,untilsend,msg);\n    node.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\n    }    \n}\n\ncontext.set(\"lastmsg\",now + untilsend);\n\n//check if in the to be confirmed array is old data\nlet confirm = global.get(\"LORIDANE.confirm\")||[];\nif (confirm.length > 0){\n    for(let con = 0, len = confirm.length; con < len;/* */){\n        if(now - confirm[con].time >= 10*size){\n            confirm.splice(con,1);\n        }else{\n            con++;\n        }\n    }\n}\n\n//save outgoing msgs to the confirmation scope\nnodes = global.get(\"LORIDANE.devices.nodes\");\nlet push;\nif(msg.payload.startsWith(\"NO\")){\n    push = true;\n    obj = {uid: msg.payload.substring(0,14), out:msg.payload, time: now};\n    for(var nds in nodes){\n        if (confirm[obj.uid] == nds.uid) push = false;\n    }\n    if(push){\n        confirm.push(obj);    \n    }    \n}\n//except sync msgs\n\nif(msg.payload.includes(\"cn:\")){\n    if (!msg.payload.includes(\"sync\") && !msg.payload.includes(\"BL\")){\n        for(let nd in nodes){\n            push = true;\n            for(var con in confirm){\n                if(nodes[nd].uid == con.uid) push = false;\n                break;\n            }\n            if(push){\n                obj = {uid: nodes[nd].uid, out:msg.payload, time: now};\n                confirm.push(obj);\n            }\n        }\n    }else{\n        context.set(\"startDisk\",now+untilsend+TS_SYNC[sf-7]);\n    }\n}\nglobal.set(\"LORIDANE.confirm\",confirm);\n\nnode.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\nsetTimeout(() => node.status({text:\"\"}),3000);\nreturn;",
+        "func": "function sendmsg(msg){\n    node.send(msg)\n}\n\nfunction getSendTime(UID){\n    const findGW = global.get(\"LORIDANE.funcs.findGW\");\n    const gws = global.get(\"LORIDANE.devices.gw\") || [0];\n    let amountOfGws = gws.length; //defaults to 1\n    const indexGW = findGW(UID);\n    const sf = global.get(\"LORIDANE.devices.gw[0].sf\") || 7;\n    let sendtime = size - timeOnAir(50,sf) * (amountOfGws-indexGW);\n    //node.warn(timeOnAir(50,sf))\n    return sendtime;\n}\n\nconst timeOnAir = global.get(\"LORIDANE.funcs.timeOnAir\");\n\n//-----------------------------------------------------------------\n// load needed data from context\nconst now = Date.now();\nconst sf = global.get(\"LORIDANE.devices.gw[0].sf\")||7;\nconst TS_SYNC = [19,34,61,111,206,386];\nconst ping = 2;\n\nlet lastmsg = context.get(\"lastmsg\")||0;\nlet startDisk = context.get(\"startDisk\")||lastmsg;\n\nlet timedisk = global.get(\"LORIDANE.timedisk\")||{size:1500,count:5};\nlet size = timedisk.size;\nlet timeinframe = (now-startDisk) % size;\n\nlet UID = msg.topic.substring(msg.topic.indexOf(\"GW\"), msg.topic.indexOf(\"GW\") + 14);\nlet sendtime = getSendTime(UID);\nlet untilsend = size - sendtime - timeinframe;\n\n// check when the timeframe for the gateway is reached\nif (msg.payload.includes('td:')) {\n    sendmsg(msg);\n}else{\n    if(timeinframe > sendtime - timeOnAir(30,sf) || untilsend < 0){\n    untilsend = 2 * size - timeinframe - sendtime;\n    setTimeout(sendmsg,untilsend,msg);\n    }else{\n    setTimeout(sendmsg,untilsend,msg);\n    node.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\n    }    \n}\n\ncontext.set(\"lastmsg\",now + untilsend);\n\n//check if in the to be confirmed array is old data\nlet confirm = global.get(\"LORIDANE.confirm\")||[];\nif (confirm.length > 0){\n    for(let con = 0, len = confirm.length; con < len;/* */){\n        if(now - confirm[con].time >= 10*size){\n            confirm.splice(con,1);\n        }else{\n            con++;\n        }\n    }\n}\n\n//save outgoing msgs to the confirmation scope\nnodes = global.get(\"LORIDANE.devices.nodes\");\nlet push;\nif(msg.payload.startsWith(\"NO\")){\n    push = true;\n    obj = {uid: msg.payload.substring(0,14), out:msg.payload, time: now};\n    for(var nds in nodes){\n        if (confirm[obj.uid] == nds.uid) push = false;\n    }\n    if(push){\n        confirm.push(obj);    \n    }    \n}\n//except sync msgs\n\nif(msg.payload.includes(\"cn:\")){\n    if (!msg.payload.includes(\"sync\") && !msg.payload.includes(\"BL\")){\n        for(let nd in nodes){\n            push = true;\n            for(var con in confirm){\n                if(nodes[nd].uid == con.uid) push = false;\n                break;\n            }\n            if(push){\n                obj = {uid: nodes[nd].uid, out:msg.payload, time: now};\n                confirm.push(obj);\n            }\n        }\n    }else{\n        context.set(\"startDisk\",now+untilsend+TS_SYNC[sf-7]+ping);\n    }\n}\nglobal.set(\"LORIDANE.confirm\",confirm);\n\nnode.status({text:\"Delayed msg for \"+untilsend+\" ms\"});\nsetTimeout(() => node.status({text:\"\"}),3000);\nreturn;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
@@ -5531,7 +5321,7 @@
         "type": "function",
         "z": "364ae788.0e6328",
         "name": "add new node",
-        "func": "//if (msg.friendlyname !== undefined){return}\n\nblock = flow.get(\"block\")|| false;\ngateways = global.get(\"LORIDANE.devices.gw\")||[];\nsetTimeout(()=> node.status({}),5000);\n\nfunction sendDelayed(arr){\n    node.send(arr);\n}\n\n//reset the config of the gateway after 10 secs to values before\nfunction resetConfig(){\n    flow.set(\"block\",false);\n    gateways = flow.get(\"lastGatewayParams\")||[];\n    flow.set(\"lastGatewayParams\",[]);\n    \n    for(var gateway in gateways){\n    node.send([null,{payload:`cg:fg:${gateways[gateway].freq / 100000};sg:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n    }\n    node.status({text:`Reset Configuration to: \"cg:fg:${gateways[gateway].freq / 100000};sg:${gateways[gateway].sf};\"`});\n    \n}\n\nlet timer;\nlet gateway;\n\n\nif((msg.topic != \"syncfrequency\" || msg.topic != \"acknowledge\" ) && block){\n    node.status({text:\"Blocked and Waiting for New Devices\"});\n    return;\n}else if(msg.topic == \"syncfrequency\"){\n    flow.set(\"block\",true);\n    flow.set(\"lastGatewayParams\",gateways),\n    timer = clearTimeout(timer);\n    //gateways = global.get(\"LORIDANE.devices.gw\");\n\n    for(gateway in gateways){\n        node.send([null,{payload:\"cg:fg:8670;sg:7;\",topic:`lora/${gateways[gateway].uid}`}]);\n        setTimeout(sendDelayed,500,[null,{payload:`cn:fn:${gateways[gateway].freq / 100000};sn:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n    }\n    node.status({text:`Configuration Sent to GWs: \"cg:fg:8670;sg:7;\"`});\n    timer = setTimeout(resetConfig,10500);\n    flow.set(\"timer\",timer);\n    return;\n}else if(msg.topic == \"acknowledge\"){\n    node.send([msg,null]);\n    flow.set(\"block\",true);\n    flow.set(\"lastGatewayParams\",gateways),\n    timer = clearTimeout(timer);\n    gateways = global.get(\"LORIDANE.devices.gw\");\n    msg.data.pay = -1;\n    \n    if (gateways != []){\n        for(gateway in gateways){\n            node.send([msg,{payload:`cn:fn:${gateways[gateway].freq / 100000};sn:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n        }\n    }else{\n        node.send([msg,{payload:`cn:fn:${msg.data.freq / 100000};sn:${msg.data.sf};`,topic:`lora/${msg.data.gw}`}]);\n    }\n    node.status({text:`Configuration Sent to GWs: \"cg:fg:8670;sg:7;\"`});\n    timer = setTimeout(resetConfig,10500);\n    flow.set(\"timer\",timer);\n    return;\n}\n\nnode.status({text:\"Passthrough Mode\"});\n\nreturn [msg,null];",
+        "func": "//if (msg.friendlyname !== undefined){return}\n\nblock = flow.get(\"block\")|| false;\ngateways = global.get(\"LORIDANE.devices.gw\")||[];\nsetTimeout(()=> node.status({}),5000);\n\nfunction sendDelayed(arr){\n    node.send(arr);\n}\n\n//reset the config of the gateway after 10 secs to values before\nfunction resetConfig(){\n    flow.set(\"block\",false);\n    gateways = flow.get(\"lastGatewayParams\")||[];\n    flow.set(\"lastGatewayParams\",[]);\n    \n    for(var gateway in gateways){\n    node.send([null,{payload:`cg:fg:${gateways[gateway].freq / 100000};sg:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n    }\n    node.status({text:`Reset Configuration to: \"cg:fg:${gateways[gateway].freq / 100000};sg:${gateways[gateway].sf};\"`});\n}\n\nlet timer;\nlet gateway;\n\nif((msg.topic != \"syncfrequency\" || msg.topic != \"acknowledge\" ) && block){\n    node.status({text:\"Blocked and Waiting for New Devices\"});\n    return;\n}else if(msg.topic == \"syncfrequency\"){\n    flow.set(\"block\",true);\n    flow.set(\"lastGatewayParams\",gateways),\n    timer = clearTimeout(timer);\n    //gateways = global.get(\"LORIDANE.devices.gw\");\n\n    for(gateway in gateways){\n        node.send([null,{payload:\"cg:fg:8670;sg:7;\",topic:`lora/${gateways[gateway].uid}`}]);\n        setTimeout(sendDelayed,500,[null,{payload:`cn:fn:${gateways[gateway].freq / 100000};sn:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n    }\n    node.status({text:`Configuration Sent to GWs: \"cg:fg:8670;sg:7;\"`});\n    timer = setTimeout(resetConfig,10500);\n    flow.set(\"timer\",timer);\n    return;\n}else if(msg.topic == \"acknowledge\"){\n    node.send([msg,null]);\n    flow.set(\"block\",true);\n    flow.set(\"lastGatewayParams\",gateways),\n    timer = clearTimeout(timer);\n    gateways = global.get(\"LORIDANE.devices.gw\");\n    msg.data.pay = -1;\n    \n    if (gateways != []){\n        for(gateway in gateways){\n            node.send([msg,{payload:`cn:fn:${gateways[gateway].freq / 100000};sn:${gateways[gateway].sf};`,topic:`lora/${gateways[gateway].uid}`}]);\n        }\n    }else{\n        node.send([msg,{payload:`cn:fn:${msg.data.freq / 100000};sn:${msg.data.sf};`,topic:`lora/${msg.data.gw}`}]);\n    }\n    node.status({text:`Configuration Sent to GWs: \"cg:fg:8670;sg:7;\"`});\n    timer = setTimeout(resetConfig,10500);\n    flow.set(\"timer\",timer);\n    return;\n}\n\nnode.status({text:\"Passthrough Mode\"});\n\nreturn [msg,null];",
         "outputs": 2,
         "noerr": 0,
         "initialize": "",
@@ -5690,7 +5480,7 @@
                 "t": "set",
                 "p": "topic",
                 "pt": "msg",
-                "to": "For the current parameters the minimum node interval is (ms):",
+                "to": "For the current network parameters the minimum node interval is (ms):",
                 "tot": "str"
             }
         ],
@@ -5713,9 +5503,9 @@
         "type": "ui_text",
         "z": "364ae788.0e6328",
         "group": "4640ddc61a547a32",
-        "order": 2,
-        "width": "8",
-        "height": "2",
+        "order": 14,
+        "width": 8,
+        "height": 2,
         "name": "",
         "label": "{{msg.topic}}",
         "format": "{{msg.payload}}",
@@ -6093,8 +5883,8 @@
             "f94736f23109f93d",
             "1405d54f20affd95"
         ],
-        "x": 405,
-        "y": 480,
+        "x": 415,
+        "y": 460,
         "wires": []
     },
     {
@@ -6451,6 +6241,69 @@
         "broker": "58249eec39689acc",
         "x": 1550,
         "y": 620,
+        "wires": []
+    },
+    {
+        "id": "46922847f279435e",
+        "type": "ping",
+        "z": "20f0b4a8.24eafc",
+        "protocol": "IPv4",
+        "mode": "triggered",
+        "name": "",
+        "host": "192.168.2.104",
+        "timer": "600",
+        "inputs": 1,
+        "x": 690,
+        "y": 1080,
+        "wires": [
+            [
+                "4d9de2c118f486cf"
+            ]
+        ]
+    },
+    {
+        "id": "253fd4dea6e6164a",
+        "type": "inject",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 630,
+        "y": 1020,
+        "wires": [
+            [
+                "46922847f279435e"
+            ]
+        ]
+    },
+    {
+        "id": "4d9de2c118f486cf",
+        "type": "debug",
+        "z": "20f0b4a8.24eafc",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 890,
+        "y": 1100,
         "wires": []
     },
     {
@@ -6848,10 +6701,12 @@
         "links": [
             "dcee77a5.339a48"
         ],
-        "x": 215,
-        "y": 220,
+        "x": 275,
+        "y": 500,
         "wires": [
-            []
+            [
+                "58ed357ac0a7c7af"
+            ]
         ]
     },
     {
@@ -6859,14 +6714,14 @@
         "type": "function",
         "z": "0b3f1702fe1b5fd1",
         "name": "Filter Nodes ONRO",
-        "func": "\nnodes = [\n    \"NO94B97EC0C46C\",\n    //\"NO:94:B9:7E:C0:C3:1C\"\n    ];\n\nif (nodes.indexOf(msg.data.node) == -1){\n    return;\n}\n\npay = msg.payload.split(\";\");\n\nif(pay[0] == \"+\"){\n    return;\n}\nwatthours = parseFloat(pay[0])\nwatts = parseFloat(pay[1])\nmsg.payload = {watts:watts,watthours:watthours};\nreturn msg;",
+        "func": "\nnodes = [\n    \"NOF008D1C8DC20\",\n    //\"NO:94:B9:7E:C0:C3:1C\"\n    ];\n\nif (nodes.indexOf(msg.data.node) == -1){\n    return;\n}\n\npay = msg.payload.split(\";\");\n\nif(pay[0] == \"+\"){\n    return;\n}\nwatthours = parseFloat(pay[0])\nwatts = parseFloat(pay[1])\nmsg.payload = {watts,watthours};\nreturn msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 360,
-        "y": 220,
+        "x": 650,
+        "y": 140,
         "wires": [
             [
                 "875c4592db053187",
@@ -6879,7 +6734,7 @@
         "type": "debug",
         "z": "0b3f1702fe1b5fd1",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -6887,8 +6742,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 630,
-        "y": 180,
+        "x": 920,
+        "y": 100,
         "wires": []
     },
     {
@@ -6897,8 +6752,8 @@
         "z": "0b3f1702fe1b5fd1",
         "name": "Leistung ONRO",
         "group": "bf837bc6.2c47f8",
-        "order": 4,
-        "width": 6,
+        "order": 2,
+        "width": 8,
         "height": 4,
         "gtype": "gage",
         "title": "Leistung - ONRO Zähler",
@@ -6913,8 +6768,9 @@
         ],
         "seg1": "",
         "seg2": "",
-        "x": 1080,
-        "y": 260,
+        "className": "",
+        "x": 1370,
+        "y": 180,
         "wires": []
     },
     {
@@ -6922,14 +6778,14 @@
         "type": "function",
         "z": "0b3f1702fe1b5fd1",
         "name": "Set DataSet",
-        "func": "if(msg.topic == \"offset\"){\n    UID = msg.data.node\n    reading = parseFloat(msg.payload.set.replace(\",\",\".\"));\n    power = 0;\n    global.set(`LORIDANE.data.${UID}.lastreading`,reading);\n    return;\n}\n//if (isNaN(msg.payload)){return}\ndata = msg.data\nUID = data.node;\ntime = new Date(data.lastSeen)||new Date.now();\nshowtime = time.toLocaleString(\"de-DE\");\ndate = time.toISOString().substr(0,7);\nUSER = global.get(\"LORIDANE.LinuxUsername\")\nwriteConfig = global.get(\"LORIDANE.funcs.writeConfig\");\n\n//----------------------------------------\n//Calc power\nfunction getpower(input){\n    const now = Date.now();\n    const lasttime = flow.get(`data.${UID}.lasttime`)||0;\n    flow.set(`data.${UID}.lasttime`,now);\n    const msInhours = 3600000;\n\n    interval = now-lasttime;\n    ivperhour= msInhours / interval;\n    value = Math.round(input * ivperhour*100)/100;\n\n    if(value > 55000){\n        return;\n    }\n    return value;\n}\n//------------------------------------------\n//set object\nlastreading = global.get(`LORIDANE.data.${UID}.lastreading`)||0;\nreading = lastreading + (msg.payload.watthours/1000);\nconst obj = {\n    reading : reading,\n    power : msg.payload.watts,\n    timestamp : data.lastSeen,\n    time:showtime,\n    powerunit: \"Watt\",\n    readingunit: \"kWh\"\n}\nif(obj.reading > 0)global.set(`LORIDANE.data.${UID}.lastreading`,reading);\nif(obj.reading !== null && obj.power !== null){\n    msg.filename = `/home/${USER}/LORIDANE/database/${UID}/${UID}_${date}.json`;\n    writeConfig();\n}\nmsg.payload = obj;\n\nreturn;//  msg;",
+        "func": "if(msg.topic == \"offset\"){\n    UID = msg.data.node\n    reading = parseFloat(msg.payload.set.replace(\",\",\".\"));\n    power = 0;\n    global.set(`LORIDANE.data.${UID}.lastreading`,reading);\n    return;\n}\n//if (isNaN(msg.payload)){return}\ndata = msg.data\nUID = data.node;\ntime = new Date(data.lastSeen)||new Date.now();\nshowtime = time.toLocaleString(\"de-DE\");\ndate = time.toISOString().substr(0,7);\nUSER = global.get(\"LORIDANE.LinuxUsername\")\nwriteConfig = global.get(\"LORIDANE.funcs.writeConfig\");\n\n//----------------------------------------\n//Calc power\nfunction getpower(input){\n    const now = Date.now();\n    const lasttime = flow.get(`data.${UID}.lasttime`)||0;\n    flow.set(`data.${UID}.lasttime`,now);\n    const msInhours = 3600000;\n\n    interval = now-lasttime;\n    ivperhour= msInhours / interval;\n    value = Math.round(input * ivperhour*100)/100;\n\n    if(value > 55000){\n        return;\n    }\n    return value;\n}\n//------------------------------------------\n//set object\nlastreading = global.get(`LORIDANE.data.${UID}.lastreading`)||0;\nreading = lastreading + (msg.payload.watthours/1000);\nconst obj = {\n    reading : reading,\n    power : msg.payload.watts,\n    timestamp : data.lastSeen,\n    time:showtime,\n    powerunit: \"Watt\",\n    readingunit: \"kWh\"\n}\n\nmsg.payload = obj;\n\nreturn msg;//  msg;",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 610,
-        "y": 260,
+        "x": 900,
+        "y": 180,
         "wires": [
             [
                 "441a7d5bc511a0d6",
@@ -6943,7 +6799,7 @@
         "z": "0b3f1702fe1b5fd1",
         "name": "",
         "group": "bf837bc6.2c47f8",
-        "order": 12,
+        "order": 3,
         "width": 8,
         "height": 4,
         "label": "Letzte 12 Stunden",
@@ -6974,8 +6830,9 @@
         ],
         "outputs": 1,
         "useDifferentColor": false,
-        "x": 1090,
-        "y": 300,
+        "className": "",
+        "x": 1380,
+        "y": 220,
         "wires": [
             []
         ]
@@ -6997,8 +6854,8 @@
         "topic": "",
         "payload": "[]",
         "payloadType": "json",
-        "x": 910,
-        "y": 300,
+        "x": 1200,
+        "y": 220,
         "wires": [
             [
                 "f2212b2bb405c4e0"
@@ -7010,7 +6867,7 @@
         "type": "debug",
         "z": "0b3f1702fe1b5fd1",
         "name": "",
-        "active": false,
+        "active": true,
         "tosidebar": true,
         "console": false,
         "tostatus": false,
@@ -7018,8 +6875,8 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 810,
-        "y": 180,
+        "x": 1100,
+        "y": 100,
         "wires": []
     },
     {
@@ -7041,8 +6898,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 935,
-        "y": 260,
+        "x": 1225,
+        "y": 180,
         "wires": [
             [
                 "f2212b2bb405c4e0",
@@ -7057,7 +6914,7 @@
         "z": "0b3f1702fe1b5fd1",
         "name": "",
         "group": "bf837bc6.2c47f8",
-        "order": 1,
+        "order": 5,
         "width": 0,
         "height": 0,
         "passthru": false,
@@ -7070,8 +6927,8 @@
         "payloadType": "json",
         "topic": "clear",
         "topicType": "str",
-        "x": 910,
-        "y": 340,
+        "x": 1200,
+        "y": 260,
         "wires": [
             [
                 "f2212b2bb405c4e0"
@@ -7104,8 +6961,8 @@
         "topic": "offset",
         "payload": "60.51",
         "payloadType": "num",
-        "x": 390,
-        "y": 260,
+        "x": 680,
+        "y": 180,
         "wires": [
             [
                 "875c4592db053187"
@@ -7117,7 +6974,7 @@
         "type": "ui_text",
         "z": "0b3f1702fe1b5fd1",
         "group": "bf837bc6.2c47f8",
-        "order": 2,
+        "order": 6,
         "width": 8,
         "height": 2,
         "name": "",
@@ -7125,8 +6982,8 @@
         "format": "{{msg.payload.reading|number:2}} kWh",
         "layout": "col-center",
         "className": "",
-        "x": 1070,
-        "y": 220,
+        "x": 1360,
+        "y": 140,
         "wires": []
     },
     {
@@ -7155,8 +7012,8 @@
         "from": "",
         "to": "",
         "reg": false,
-        "x": 545,
-        "y": 340,
+        "x": 835,
+        "y": 260,
         "wires": [
             [
                 "875c4592db053187"
@@ -7171,7 +7028,7 @@
         "name": "",
         "label": "Zählerstand Setzen",
         "group": "bf837bc6.2c47f8",
-        "order": 13,
+        "order": 1,
         "width": 0,
         "height": 0,
         "options": [
@@ -7192,8 +7049,8 @@
         "topic": "topic",
         "topicType": "msg",
         "splitLayout": "",
-        "x": 270,
-        "y": 320,
+        "x": 660,
+        "y": 260,
         "wires": [
             [
                 "49acfb51aeafe31b"
@@ -7218,7 +7075,7 @@
         "payload": "NO94B97EC0C46C.json",
         "payloadType": "str",
         "x": 290,
-        "y": 540,
+        "y": 760,
         "wires": [
             [
                 "50d83ef34d804ebd"
@@ -7238,7 +7095,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 1210,
-        "y": 520,
+        "y": 740,
         "wires": []
     },
     {
@@ -7254,7 +7111,7 @@
         "oldrc": false,
         "name": "",
         "x": 760,
-        "y": 540,
+        "y": 760,
         "wires": [
             [
                 "f26731381eb527ee"
@@ -7273,15 +7130,15 @@
         "rules": [
             {
                 "t": "eq",
-                "v": "NO94B97EC0C46C",
+                "v": "NOF008D1C8DC20 ",
                 "vt": "str"
             }
         ],
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 790,
-        "y": 260,
+        "x": 1080,
+        "y": 180,
         "wires": [
             [
                 "cbf1cf038c1d89f9",
@@ -7306,7 +7163,7 @@
         "name": "example: read last 5 lines of database",
         "info": "",
         "x": 310,
-        "y": 480,
+        "y": 700,
         "wires": []
     },
     {
@@ -7321,7 +7178,7 @@
         "finalize": "",
         "libs": [],
         "x": 400,
-        "y": 720,
+        "y": 940,
         "wires": [
             [
                 "3e8c6e2911401b56"
@@ -7346,7 +7203,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 230,
-        "y": 720,
+        "y": 940,
         "wires": [
             [
                 "53e53fc1526674a7"
@@ -7366,7 +7223,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 580,
-        "y": 720,
+        "y": 940,
         "wires": []
     },
     {
@@ -7376,7 +7233,7 @@
         "name": "Example add Class A Device to Config",
         "info": "",
         "x": 300,
-        "y": 680,
+        "y": 900,
         "wires": []
     },
     {
@@ -7391,7 +7248,7 @@
         "finalize": "",
         "libs": [],
         "x": 610,
-        "y": 920,
+        "y": 1140,
         "wires": [
             [
                 "e023d10b18a488ed",
@@ -7421,7 +7278,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 220,
-        "y": 920,
+        "y": 1140,
         "wires": [
             [
                 "c416bb47d58e7e1d"
@@ -7440,7 +7297,7 @@
         "finalize": "",
         "libs": [],
         "x": 400,
-        "y": 920,
+        "y": 1140,
         "wires": [
             [
                 "1d20ac9a4a7e3796"
@@ -7461,7 +7318,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 1070,
-        "y": 920,
+        "y": 1140,
         "wires": []
     },
     {
@@ -7476,7 +7333,7 @@
         "finalize": "",
         "libs": [],
         "x": 840,
-        "y": 920,
+        "y": 1140,
         "wires": [
             [
                 "854799d168173f31"
@@ -7497,7 +7354,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 930,
-        "y": 860,
+        "y": 1080,
         "wires": []
     },
     {
@@ -7507,7 +7364,7 @@
         "name": "Example Read DB and calc cost for a given time interval",
         "info": "",
         "x": 350,
-        "y": 860,
+        "y": 1080,
         "wires": []
     },
     {
@@ -7522,7 +7379,7 @@
         "finalize": "",
         "libs": [],
         "x": 470,
-        "y": 1120,
+        "y": 1340,
         "wires": [
             [
                 "67e7dc8e5e0d33a7"
@@ -7551,7 +7408,7 @@
         "payload": "",
         "payloadType": "date",
         "x": 220,
-        "y": 1080,
+        "y": 1300,
         "wires": [
             [
                 "2989d1d20b53779c"
@@ -7570,7 +7427,7 @@
         "finalize": "",
         "libs": [],
         "x": 380,
-        "y": 1080,
+        "y": 1300,
         "wires": [
             [
                 "9828211879842201"
@@ -7591,7 +7448,7 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 1190,
-        "y": 1020,
+        "y": 1240,
         "wires": []
     },
     {
@@ -7606,7 +7463,7 @@
         "finalize": "",
         "libs": [],
         "x": 580,
-        "y": 1160,
+        "y": 1380,
         "wires": [
             [
                 "7b804f9ff2308e9f"
@@ -7625,7 +7482,7 @@
         "finalize": "",
         "libs": [],
         "x": 680,
-        "y": 1200,
+        "y": 1420,
         "wires": [
             [
                 "1c032af464f2e330"
@@ -7644,7 +7501,7 @@
         "finalize": "",
         "libs": [],
         "x": 790,
-        "y": 1240,
+        "y": 1460,
         "wires": [
             [
                 "8babc9f33f594710",
@@ -7664,7 +7521,7 @@
         "finalize": "",
         "libs": [],
         "x": 1030,
-        "y": 1240,
+        "y": 1460,
         "wires": [
             [
                 "18b06a85b8a73543"
@@ -7682,7 +7539,7 @@
         "overwriteFile": "false",
         "encoding": "none",
         "x": 1370,
-        "y": 1240,
+        "y": 1460,
         "wires": [
             []
         ]
@@ -7699,7 +7556,7 @@
         "finalize": "",
         "libs": [],
         "x": 970,
-        "y": 1320,
+        "y": 1540,
         "wires": [
             [
                 "24b1eca37384f932"
@@ -7717,7 +7574,7 @@
         "overwriteFile": "false",
         "encoding": "none",
         "x": 1380,
-        "y": 1320,
+        "y": 1540,
         "wires": [
             []
         ]
@@ -7734,7 +7591,7 @@
         "finalize": "",
         "libs": [],
         "x": 850,
-        "y": 1280,
+        "y": 1500,
         "wires": [
             [
                 "57fd659f2ac85919",
@@ -7749,7 +7606,7 @@
         "name": "Prepare Data for statistical analysis including Covalence Matrix",
         "info": "",
         "x": 390,
-        "y": 1020,
+        "y": 1240,
         "wires": []
     },
     {
@@ -7765,8 +7622,267 @@
         "targetType": "full",
         "statusVal": "",
         "statusType": "auto",
-        "x": 1530,
-        "y": 1000,
+        "x": 1050,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "58ed357ac0a7c7af",
+        "type": "function",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "save last readings",
+        "func": "readings = context.get(\"lastreading\") ||{};\n\nif(msg.topic == \"resettime\"){\n    keys = Object.keys(readings)\n    for (var key of keys){\n        readings[`${key}`].lastreading = 0;\n    }\n    context.set(`lastreading`,readings);\n    return;\n}\n\ndata = msg.data;\nnode  = data.node;\npay = data.pay.split(\";\").map((val) => parseFloat(val));\nmsg.power = pay[1];\n\nthisreading = readings[`${node}`] || {lastreading:0};\n\nif(thisreading.lastreading === 0){\n    thisreading.starttime = Date.now();\n}\n\nthisreading.lastreading += pay[0];\nreadings[`${node}`] = thisreading;\ncontext.set(`lastreading`,readings);\nmsg.reading = thisreading.lastreading;\nmsg.starttime = thisreading.starttime;\nmsg.duration = Date.now() -thisreading.starttime;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 770,
+        "y": 500,
+        "wires": [
+            [
+                "b5e6e7db2e738f9d",
+                "2970013ca8e18483"
+            ]
+        ]
+    },
+    {
+        "id": "515e34fe991bc741",
+        "type": "function",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "Load Devices",
+        "func": "let nodes = global.get(\"LORIDANE.devices.nodes\");\nlet gws = global.get(\"LORIDANE.devices.gw\");\nlet options = [];\n\n// as list for the choose device dropdown load the device an if available the friendlyname\nfor (var node in nodes){\n    let name = \"\";\n    if(nodes[node].friendlyname != \"\" && nodes[node].friendlyname != undefined){\n        name = `${nodes[node].uid} - ${nodes[node].friendlyname}`;\n        options[node] = {[name]:nodes[node].uid};\n    }else{\n        name = `${nodes[node].uid}`;\n        options[node] = {[name]:nodes[node].uid} ;\n    }\n}\n\nreturn {options:options};",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 560,
+        "wires": [
+            [
+                "5071c469e094c617"
+            ]
+        ]
+    },
+    {
+        "id": "5071c469e094c617",
+        "type": "ui_dropdown",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "Choose Node",
+        "label": "",
+        "tooltip": "",
+        "place": "Select Device to show last reading",
+        "group": "4640ddc61a547a32",
+        "order": 2,
+        "width": 7,
+        "height": 1,
+        "passthru": false,
+        "multiple": false,
+        "options": [],
+        "payload": "",
+        "topic": "nodes",
+        "topicType": "str",
+        "className": "",
+        "x": 760,
+        "y": 560,
+        "wires": [
+            [
+                "b5e6e7db2e738f9d"
+            ]
+        ]
+    },
+    {
+        "id": "c0bdff5f3de1f04e",
+        "type": "ui_button",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "reload nodes",
+        "group": "4640ddc61a547a32",
+        "order": 1,
+        "width": 1,
+        "height": 1,
+        "passthru": false,
+        "label": "",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "sync",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 370,
+        "y": 560,
+        "wires": [
+            [
+                "515e34fe991bc741"
+            ]
+        ]
+    },
+    {
+        "id": "f72ee519a7f8c750",
+        "type": "comment",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "show last readings on dashboard",
+        "info": "",
+        "x": 350,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "b5e6e7db2e738f9d",
+        "type": "function",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "filter nodes",
+        "func": "let filternode = context.get(\"filternode\") || \"\";\n\nif(msg.topic == \"nodes\"){\n    filternode = msg.payload;\n    context.set(\"filternode\",filternode);\n    return;\n}\n\nif (msg.data.node !== filternode){\n    return;\n}\n\nfunction showduration(dur){\n    dur = Math.ceil(dur / 1000);\n    if(dur < 60){\n        dur = dur + \" sec\";\n    }else if(dur < 3600){\n        dur = Math.round(dur / 60) + \" min\"\n    }else{\n        dur = (Math.round(dur / 36) / 100) + \" hours\"\n    }\n    return dur;\n}\nduration = showduration(msg.duration)\nmsg.duration = duration;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 970,
+        "y": 500,
+        "wires": [
+            [
+                "822f389b917b8cc5",
+                "bfdbd7eab404ea4d",
+                "44148e6954a485fa",
+                "c2a79d117164d925"
+            ]
+        ]
+    },
+    {
+        "id": "44148e6954a485fa",
+        "type": "ui_gauge",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "Current Power",
+        "group": "4640ddc61a547a32",
+        "order": 5,
+        "width": 6,
+        "height": 4,
+        "gtype": "gage",
+        "title": "Power - {{msg.data.node}}",
+        "label": "Watt",
+        "format": "{{msg.power|number:2}}",
+        "min": 0,
+        "max": "1000",
+        "colors": [
+            "#3fadb5",
+            "#3fadb5",
+            "#3fadb5"
+        ],
+        "seg1": "",
+        "seg2": "",
+        "className": "",
+        "x": 1200,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "c2a79d117164d925",
+        "type": "ui_chart",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "",
+        "group": "bf837bc6.2c47f8",
+        "order": 4,
+        "width": 8,
+        "height": 4,
+        "label": "Letzte 12 Stunden",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": "12",
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 1210,
+        "y": 580,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bfdbd7eab404ea4d",
+        "type": "ui_text",
+        "z": "0b3f1702fe1b5fd1",
+        "group": "4640ddc61a547a32",
+        "order": 13,
+        "width": 8,
+        "height": 2,
+        "name": "",
+        "label": "Energy Usage during {{msg.duration}}",
+        "format": "{{msg.reading|number:2}} Wh",
+        "layout": "col-center",
+        "className": "",
+        "x": 1170,
+        "y": 500,
+        "wires": []
+    },
+    {
+        "id": "ea517d70ef898028",
+        "type": "ui_button",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "Reset Time",
+        "group": "4640ddc61a547a32",
+        "order": 3,
+        "width": 8,
+        "height": 1,
+        "passthru": false,
+        "label": "Reset Time",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "date",
+        "topic": "resettime",
+        "topicType": "str",
+        "x": 590,
+        "y": 440,
+        "wires": [
+            [
+                "58ed357ac0a7c7af"
+            ]
+        ]
+    },
+    {
+        "id": "2970013ca8e18483",
+        "type": "debug",
+        "z": "0b3f1702fe1b5fd1",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 904,
+        "y": 409,
         "wires": []
     },
     {
@@ -7815,5 +7931,17 @@
         "willPayload": "1",
         "willMsg": {},
         "sessionExpiry": ""
+    },
+    {
+        "id": "bf837bc6.2c47f8",
+        "type": "ui_group",
+        "d": true,
+        "name": "ONRO",
+        "tab": "278b2300.ae23ae",
+        "order": 3,
+        "disp": true,
+        "width": "8",
+        "collapse": false,
+        "className": ""
     }
 ]
