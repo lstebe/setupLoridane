@@ -43,18 +43,20 @@ and follow the whiptail instructions :) Most of the actions are performed automa
 
 7--------------------------------------------------------------------------------------
 if you already are a raspberryPI and NodeRed User, fret not, you can simply import the flowfile. if you would like to install a mqtt broker or a raspi wifi AP (for the Loridane Gateways,e.g ) you can use the installation script as well and skip the node red steps. if you have WiFi and a MQTT broker running at you spot, you can configure the Gateway to your WiFi and MQTT. In this case, for Loridane to work install following prerequisites:
+
 npm install node-red-dashboard
-	npm install node-red-contrib-fs
-	npm install node-red-contrib-throttle
-	npm install node-red-contrib-opcua
-	npm install node-red-node-ui-table
-	npm install crypto-js
-	npm install crypto
+npm install node-red-contrib-fs
+npm install node-red-contrib-throttle
+npm install node-red-contrib-opcua
+npm install node-red-node-ui-table
+npm install crypto-js
+npm install crypto
   
- In addition you will have to load the packages via the setting.js file, please make the following change (Line ~410):
- functionGlobalContext: {
-        os:require('os'),
-        fs:require("fs"),
-        crjs:require("crypto-js"),
-	      crypto:require("crypto")
-    },
+In addition you will have to load the packages via the setting.js file, please make the following change (Line ~410):
+
+functionGlobalContext: {
+os:require('os'),
+fs:require("fs"),
+crjs:require("crypto-js"),
+crypto:require("crypto")
+}
