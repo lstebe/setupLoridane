@@ -51,7 +51,7 @@ npm install node-red-contrib-opcua
 npm install node-red-node-ui-table
 npm install crypto-js
 npm install crypto
-  
+
 In addition you will have to load the packages via the setting.js file, please make the following change (Line ~410):
 
 functionGlobalContext: {
